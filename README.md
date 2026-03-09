@@ -12,7 +12,7 @@ Based on the research document: [Research Project](docs/research_project.md)
 ## Setup Instructions
 1. Clone the repo: git clone [repo-url]
 2. Create virtual environment: python -m venv venv
-3. Activate: source venv/bin/activate (Linux/Mac) or env\Scripts\activate (Windows)
+3. Activate: source venv/bin/activate (Linux/Mac) or venv\Scripts\activate (Windows)
 4. Install dependencies: pip install -r requirements.txt
 ## Running the Project
 - Data pipeline: python src/main.py --mode ingest
