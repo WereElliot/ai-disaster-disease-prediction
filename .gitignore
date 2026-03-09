@@ -1,0 +1,27 @@
+﻿# Ignore data directories
+data/raw/
+data/processed/
+data/external/
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyc
+# Environments
+.env
+.venv
+env/
+venv/
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+# Logs and models
+logs/
+models/
+*.log
+*.h5
+*.pkl
+# OS files
+.DS_Store
+Thumbs.db
+# IDE files
+.vscode/
+.idea/
