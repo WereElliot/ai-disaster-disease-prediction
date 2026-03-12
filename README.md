@@ -32,7 +32,6 @@ Ethical Policy: All data usage adheres to privacy standards (e.g., GDPR-inspired
 - XAI Layer (#7)
 - Evaluation (#8)
 ## Contributors
-- Were Elliot - Initialization
 - Group members assigned per issues.
 ## License
 MIT License
