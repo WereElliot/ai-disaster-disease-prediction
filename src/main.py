@@ -1,6 +1,7 @@
 ﻿import argparse
 from src.utils.config import load_config
-from src.data.ingest import ingest_data # Placeholder imports
+from src.data.ingest import ingest_data
+ # Placeholder imports
 # Add other imports as pipelines are built
 def main(args):
     config = load_config()

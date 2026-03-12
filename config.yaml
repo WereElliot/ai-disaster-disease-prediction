@@ -1,12 +1,36 @@
-﻿data:
+data:
   sources:
-    # updated from documentation issue 3
-    climate:
-    health:
-    disasters:
+    - name: climate
+      description: NASA POWER-inspired climate data (with Seattle sample fallback)
+      url: https://raw.githubusercontent.com/plotly/datasets/master/2016-weather-data-seattle.csv
+      params: {}
+      output: climate.csv
+      local_sample: tests/fixtures/climate_sample.csv
+    - name: health
+      description: WHO-style public health incidence dataset
+      url: https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv
+      params: {}
+      output: health.csv
+      local_sample: tests/fixtures/health_sample.csv
+    - name: disasters
+      description: Simplified disasters log for flooding and droughts
+      url: https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Disasters%20Database/Disasters%20Database.csv
+      params: {}
+      output: disasters.csv
+      local_sample: tests/fixtures/disasters_sample.csv
   paths:
-    raw: "data/raw"
-    processed: "data/processed"
+    raw: data/raw
+    processed: data/processed
+  processing:
+    cleaning:
+      date_columns:
+        - date
+    merge:
+      keys:
+        - date
+        - location
+    features:
+      rolling_window: 3
 models:
   lstm:
     epochs: 100

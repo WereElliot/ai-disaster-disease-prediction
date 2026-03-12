@@ -1,0 +1,4 @@
+date,location,disaster_type,severity_score,affected_population
+2024-01-02,Kisumu,Flood,3,1500
+2024-01-05,Embu,Drought,2,800
+2024-01-07,Mombasa,Flood,4,2200
