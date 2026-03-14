@@ -1,72 +1,60 @@
-from __future__ import annotations
-
-from pathlib import Path
-from typing import Iterable
-
 import pandas as pd
+import numpy as np
+from sklearn.impute import KNNImputer
+from sklearn.preprocessing import MinMaxScaler
+from scipy import stats
+from typing import Dict, Any
 
-DEFAULT_DATE_COLUMNS = ["date"]
+def clean_data(df: pd.DataFrame, config: Dict[str, Any]) -> pd.DataFrame:
+    """Perform production-ready data cleaning and preprocessing."""
+    
+    # 1. Z-score Outlier Removal (Vectorized)
+    numeric_cols = df.select_dtypes(include=[np.number]).columns
+    if not df.empty and len(df) > 1:
+        z_threshold = config['data']['processing']['cleaning']['z_threshold']
+        # Calculate z-scores, handling NaNs
+        z_scores = np.abs(stats.zscore(df[numeric_cols], nan_policy='omit'))
+        # Keep rows where NO column exceeds threshold
+        mask = (z_scores < z_threshold).all(axis=1)
+        df = df[mask]
 
+    if df.empty:
+        return df
 
-def _normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
-    cleaned = df.copy()
-    cleaned.columns = (
-        cleaned.columns.str.strip()
-        .str.lower()
-        .str.replace(r"[^0-9a-z_]+", "_", regex=True)
-        .str.strip("_")
-    )
-    return cleaned
+    # 2. KNN Imputation (k=5)
+    knn_neighbors = min(config['data']['processing']['cleaning']['knn_neighbors'], len(df))
+    if knn_neighbors > 0:
+        imputer = KNNImputer(n_neighbors=knn_neighbors)
+        df[numeric_cols] = imputer.fit_transform(df[numeric_cols])
 
+    # 3. Min-Max Scaling (Vectorized)
+    scaler = MinMaxScaler()
+    df[numeric_cols] = scaler.fit_transform(df[numeric_cols])
 
-def _fill_numeric(df: pd.DataFrame) -> pd.DataFrame:
-    numeric_cols = df.select_dtypes(include="number").columns.tolist()
-    for col in numeric_cols:
-        median = df[col].median(skipna=True)
-        replacement = 0 if pd.isna(median) else median
-        df[col].fillna(replacement, inplace=True)
+    # 4. Monthly Resampling (Temporal Alignment)
+    if 'date' in df.columns:
+        df['date'] = pd.to_datetime(df['date'])
+        # Keep non-numeric columns if they are constant (like 'location')
+        # Otherwise, just resample numeric ones
+        resampled_numeric = df.set_index('date').select_dtypes(include=[np.number]).resample('ME').mean()
+        
+        # Try to preserve 'location' if it's unique or just take the first
+        if 'location' in df.columns:
+            locations = df.set_index('date')['location'].resample('ME').first()
+            resampled = pd.concat([resampled_numeric, locations], axis=1).reset_index()
+        else:
+            resampled = resampled_numeric.reset_index()
+        
+        return resampled
+
     return df
 
-
-def _fill_categorical(df: pd.DataFrame) -> pd.DataFrame:
-    object_cols = df.select_dtypes(include="object").columns.tolist()
-    for col in object_cols:
-        mode = df[col].mode(dropna=True)
-        fallback = "" if mode.empty else mode.iloc[0]
-        df[col].fillna(fallback, inplace=True)
-    return df
-
-
-def clean_dataframe(df: pd.DataFrame, date_columns: Iterable[str] | None = None) -> pd.DataFrame:
-    """Standardize, deduplicate, and impute missing values."""
-
-    working = _normalize_columns(df)
-    working = working.drop_duplicates()
-    date_columns = date_columns or DEFAULT_DATE_COLUMNS
-    for column in date_columns:
-        if column in working.columns:
-            working[column] = pd.to_datetime(working[column], errors="coerce")
-    working = _fill_numeric(working)
-    working = _fill_categorical(working)
-    return working
-
-
-def clean_source_file(
-    source_name: str,
-    raw_path: str,
-    processed_dir: str,
-    date_columns: Iterable[str] | None = None,
-) -> Path:
-    """Read a raw file, clean it, and write to the processed clean subfolder."""
-
-    source = Path(raw_path)
-    if not source.exists():
-        raise FileNotFoundError(f"Raw source not found: {raw_path}")
-
-    df = pd.read_csv(source)
-    cleaned = clean_dataframe(df, date_columns=date_columns)
-    clean_dir = Path(processed_dir) / "clean"
-    clean_dir.mkdir(parents=True, exist_ok=True)
-    target_path = clean_dir / f"{source_name}.csv"
-    cleaned.to_csv(target_path, index=False)
-    return target_path
+def preprocess_sources(raw_paths: Dict[str, str], config: Dict[str, Any]) -> Dict[str, pd.DataFrame]:
+    """Preprocess individual raw sources before merging."""
+    # Simplified: Assuming dataframes are already created from raw files
+    # In practice: pd.read_json/csv depending on source
+    processed_dfs = {}
+    for source, path in raw_paths.items():
+        df = pd.read_csv(path) if path.endswith('.csv') else pd.read_json(path)
+        processed_dfs[source] = clean_data(df, config)
+    return processed_dfs
