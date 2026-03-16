@@ -15,7 +15,7 @@ data:
         longitude: 36.8219
         latitude: -1.2921
         start: "20170101"
-        end: "20240101"
+        end: "20260201"
         format: "JSON"
     health:
       name: WHO_GHO

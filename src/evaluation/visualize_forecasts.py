@@ -161,91 +161,130 @@ def smooth_curve(x_dates, y_values, points=300):
         return x_unique, y_unique
 
 def plot_aesthetic_forecast(hist_df, forecast_df, entity, label, output_path):
-    """Creates a high-accuracy aesthetic plot with smooth waves and distinct colors."""
+    """Creates a high-accuracy aesthetic plot with seamless transitions and symmetric horizontal scaling."""
     name = entity.replace('_cases', '').replace('_events', '').replace('_event', '').capitalize()
     
-    # Filter recent history for better focus
-    recent_hist = hist_df.tail(max(60, len(forecast_df) * 2))
+    # 1. Symmetric Horizontal Scaling: Show as much history as we show forecast
+    forecast_duration = (forecast_df['date'].max() - forecast_df['date'].min())
+    history_cutoff = hist_df['date'].max() - forecast_duration
+    recent_hist = hist_df[hist_df['date'] >= history_cutoff].copy()
     
+    if len(recent_hist) < 5: # Fallback for very short durations
+        recent_hist = hist_df.tail(max(10, len(forecast_df)))
+        
+    cutoff_val = recent_hist['date'].max()
+    
+    # Create combined dataframe to ensure spline continuity
+    combined = pd.concat([
+        recent_hist[['date', entity]], 
+        forecast_df[['date', entity]]
+    ]).drop_duplicates('date').sort_values('date')
+    
+    # 2. Generate Unified Smooth Curve
+    full_dates, full_vals = smooth_curve(combined['date'].tolist(), combined[entity].tolist(), points=500)
+    
+    # Separate smoothed curve
+    h_mask = [d <= cutoff_val for d in full_dates]
+    f_mask = [d >= cutoff_val for d in full_dates]
+    
+    h_dates = [d for d, m in zip(full_dates, h_mask) if m]
+    h_vals = [v for v, m in zip(full_vals, h_mask) if m]
+    f_dates = [d for d, m in zip(full_dates, f_mask) if m]
+    f_vals = [v for v, m in zip(full_vals, f_mask) if m]
+
     plt.figure(figsize=(14, 7), dpi=150)
     plt.style.use('seaborn-v0_8-whitegrid')
     
-    # 1. Historical Data (Smooth)
-    h_dates, h_vals = smooth_curve(recent_hist['date'].tolist(), recent_hist[entity].tolist())
-    plt.plot(h_dates, h_vals, color='#1A5276', linewidth=3, label='Historical Actual', alpha=0.9)
+    # 3. Plot Historical Segment
+    plt.plot(h_dates, h_vals, color='#1A5276', linewidth=3.5, label='Historical Actual', alpha=0.9)
     plt.fill_between(h_dates, 0, h_vals, color='#1A5276', alpha=0.05)
 
-    # 2. Forecast Data (Smooth)
-    f_dates, f_vals = smooth_curve(forecast_df['date'].tolist(), forecast_df[entity].tolist())
-    plt.plot(f_dates, f_vals, color='#CB4335', linewidth=3, linestyle='--', label='Model Projection', alpha=0.9)
+    # 4. Plot Forecast Segment
+    plt.plot(f_dates, f_vals, color='#CB4335', linewidth=3.5, linestyle='-', label='Model Projection', alpha=0.9)
 
-    # 3. Confidence Interval (Smooth)
+    # 5. Smooth Confidence Interval
     if f'{entity}_lower' in forecast_df.columns:
-        _, low_vals = smooth_curve(forecast_df['date'].tolist(), forecast_df[f'{entity}_lower'].tolist())
-        _, high_vals = smooth_curve(forecast_df['date'].tolist(), forecast_df[f'{entity}_upper'].tolist())
-        plt.fill_between(f_dates, low_vals, high_vals, color='#CB4335', alpha=0.15, label='95% Predictive Interval')
+        last_hist_val = recent_hist[entity].iloc[-1]
+        ci_dates_raw = [cutoff_val] + forecast_df['date'].tolist()
+        ci_low_raw = [last_hist_val] + forecast_df[f'{entity}_lower'].tolist()
+        ci_high_raw = [last_hist_val] + forecast_df[f'{entity}_upper'].tolist()
+        
+        _, low_smooth = smooth_curve(ci_dates_raw, ci_low_raw, points=300)
+        ci_smooth_dates, high_smooth = smooth_curve(ci_dates_raw, ci_high_raw, points=300)
+        
+        plt.fill_between(ci_smooth_dates, low_smooth, high_smooth, color='#CB4335', alpha=0.12, label='95% Predictive Interval', edgecolors='none')
 
     # Styling
-    plt.axvline(hist_df['date'].max(), color='#34495E', linestyle=':', linewidth=2, alpha=0.6)
-    plt.text(hist_df['date'].max(), plt.ylim()[1]*0.95, ' Forecast Horizon', color='#34495E', fontweight='bold')
+    plt.axvline(cutoff_val, color='#34495E', linestyle='--', linewidth=1.5, alpha=0.7)
     
-    plt.title(f"{name} Outbreak Vulnerability Analysis: {label}", fontsize=16, fontweight='bold', pad=20)
-    plt.ylabel("Vulnerability / Raw Counts", fontsize=13)
-    plt.xlabel("Timeline", fontsize=13)
+    plt.title(f"{name} Outbreak Vulnerability Analysis: {label} Horizon", fontsize=17, fontweight='bold', pad=25)
+    plt.ylabel("Vulnerability Index / Raw Counts", fontsize=13, fontweight='bold')
+    plt.xlabel("Timeline (Symmetric History & Forecast)", fontsize=11, fontstyle='italic')
     
-    plt.legend(loc='upper left', frameon=True, facecolor='white', framealpha=0.9)
+    plt.legend(loc='upper left', frameon=True, facecolor='white', framealpha=0.9, fontsize=11)
     plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%b %Y'))
-    plt.xticks(rotation=25)
-    plt.grid(True, linestyle='--', alpha=0.3)
+    plt.xticks(rotation=25, fontsize=10)
+    plt.grid(True, linestyle=':', alpha=0.5)
     
-    # Clean borders
-    sns.despine(left=True, bottom=True)
+    sns.despine(trim=True)
     plt.tight_layout()
     plt.savefig(output_path)
     plt.close()
 
 def plot_aesthetic_dashboard(hist_df, forecast_df, output_path):
-    """Generates a comprehensive static dashboard with synchronized styling."""
-    fig, axes = plt.subplots(3, 1, figsize=(16, 20), dpi=150)
+    """Generates a comprehensive dashboard with smooth transitions and symmetric scaling."""
+    fig, axes = plt.subplots(3, 1, figsize=(16, 22), dpi=150)
     plt.style.use('seaborn-v0_8-whitegrid')
     
-    recent_hist = hist_df.tail(120)
+    # 3-month horizontal scale symmetry
+    forecast_duration = timedelta(days=90)
+    history_cutoff = hist_df['date'].max() - forecast_duration
+    recent_hist = hist_df[hist_df['date'] >= history_cutoff].copy()
+    cutoff_val = recent_hist['date'].max()
     
     # 1. Climate
     t_col = 'temp' if 'temp' in hist_df.columns else 'temperature'
+    combined_t = pd.concat([recent_hist[['date', t_col]], pd.DataFrame({'date': forecast_df['date'], t_col: [recent_hist[t_col].mean()]*len(forecast_df)})]).sort_values('date')
     h_dates, h_vals = smooth_curve(recent_hist['date'].tolist(), recent_hist[t_col].tolist())
     axes[0].plot(h_dates, h_vals, color='#2E4053', linewidth=3, label='Hist Temp')
     axes[0].axhline(recent_hist[t_col].mean(), color='#E74C3C', linestyle=':', linewidth=2, label='Mean Baseline')
     axes[0].set_title("Environmental Stability Index (Temperature)", fontsize=14, fontweight='bold')
     axes[0].legend()
 
-    # 2. Diseases
+    # 2. Diseases (Smooth Transition)
     d_cols = [c for c in ['malaria_cases', 'cholera_cases', 'dengue_cases', 'covid_cases'] if c in recent_hist.columns]
     hist_d = recent_hist[d_cols].sum(axis=1)
     fore_d = forecast_df[d_cols].sum(axis=1)
-    h_dates, h_vals = smooth_curve(recent_hist['date'].tolist(), hist_d.tolist())
-    f_dates, f_vals = smooth_curve(forecast_df['date'].tolist(), fore_d.tolist())
-    axes[1].plot(h_dates, h_vals, color='#1D8348', linewidth=3, label='Historical Load')
-    axes[1].plot(f_dates, f_vals, color='#2ECC71', linewidth=3, linestyle='--', label='Projected Load')
-    axes[1].fill_between(f_dates, f_vals*0.9, f_vals*1.1, color='#2ECC71', alpha=0.1)
+    combined_d = pd.concat([pd.Series(hist_d.values, index=recent_hist['date']), pd.Series(fore_d.values, index=forecast_df['date'])]).sort_index()
+    
+    full_dates, full_vals = smooth_curve(combined_d.index.tolist(), combined_d.values.tolist())
+    h_mask = [d <= cutoff_val for d in full_dates]
+    f_mask = [d >= cutoff_val for d in full_dates]
+    
+    axes[1].plot([d for d, m in zip(full_dates, h_mask) if m], [v for v, m in zip(full_vals, h_mask) if m], color='#1D8348', linewidth=3.5, label='Historical Load')
+    axes[1].plot([d for d, m in zip(full_dates, f_mask) if m], [v for v, m in zip(full_vals, f_mask) if m], color='#2ECC71', linewidth=3.5, linestyle='-', label='Projected Load')
     axes[1].set_title("Public Health Burden: Aggregated Disease Projections", fontsize=14, fontweight='bold')
     axes[1].legend()
 
-    # 3. Disasters
+    # 3. Disasters (Smooth Transition)
     dis_cols = [c for c in ['flood_event', 'drought_event', 'cyclone_events'] if c in recent_hist.columns]
     hist_dis = recent_hist[dis_cols].sum(axis=1)
     fore_dis = forecast_df[dis_cols].sum(axis=1)
-    h_dates, h_vals = smooth_curve(recent_hist['date'].tolist(), hist_dis.tolist())
-    f_dates, f_vals = smooth_curve(forecast_df['date'].tolist(), fore_dis.tolist())
-    axes[2].plot(h_dates, h_vals, color='#922B21', linewidth=3, label='Historical Events')
-    axes[2].plot(f_dates, f_vals, color='#E67E22', linewidth=3, linestyle='--', label='Risk Proj')
-    axes[2].fill_between(f_dates, f_vals*0.8, f_vals*1.2, color='#E67E22', alpha=0.1)
+    combined_dis = pd.concat([pd.Series(hist_dis.values, index=recent_hist['date']), pd.Series(fore_dis.values, index=forecast_df['date'])]).sort_index()
+    
+    full_dates, full_vals = smooth_curve(combined_dis.index.tolist(), combined_dis.values.tolist())
+    h_mask = [d <= cutoff_val for d in full_dates]
+    f_mask = [d >= cutoff_val for d in full_dates]
+    
+    axes[2].plot([d for d, m in zip(full_dates, h_mask) if m], [v for v, m in zip(full_vals, h_mask) if m], color='#922B21', linewidth=3.5, label='Historical Events')
+    axes[2].plot([d for d, m in zip(full_dates, f_mask) if m], [v for v, m in zip(full_vals, f_mask) if m], color='#E67E22', linewidth=3.5, linestyle='-', label='Risk Proj')
     axes[2].set_title("Disaster Risk Matrix: Frequency & Severity Forecast", fontsize=14, fontweight='bold')
     axes[2].legend()
 
     for ax in axes:
+        ax.axvline(cutoff_val, color='#34495E', linestyle='--', alpha=0.5)
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%b %Y'))
-        ax.grid(True, linestyle='--', alpha=0.3)
+        ax.grid(True, linestyle=':', alpha=0.4)
         sns.despine(ax=ax, left=True, bottom=True)
 
     plt.tight_layout(pad=5.0)
@@ -253,12 +292,14 @@ def plot_aesthetic_dashboard(hist_df, forecast_df, output_path):
     plt.close()
 
 def run_forecast_visualization():
-    print("Initializing aesthetic Python visualization engine...")
-    import seaborn as sns # Ensure seaborn is available
+    print("Initializing up-to-date symmetric visualization engine...")
     predictor = ProductionPredictor()
     
     data_path = Path("data/processed/final_dataset.parquet")
     df = pd.read_parquet(data_path) if data_path.exists() else pd.read_csv("data/processed/merged_final.csv")
+    
+    # Ensure dates are datetime
+    df['date'] = pd.to_datetime(df['date'])
     
     if df['cases'].max() <= 1.0:
         for col in predictor.numeric_cols:
@@ -271,7 +312,7 @@ def run_forecast_visualization():
     all_entities = ['malaria_cases', 'cholera_cases', 'dengue_cases', 'covid_cases', 'flood_event', 'drought_event', 'cyclone_events']
     
     for label, days in horizons.items():
-        print(f"Generating aesthetic {label} visuals...")
+        print(f"Generating symmetric {label} visuals...")
         forecast_df, hist_df = predictor.predict_future(df, days)
         
         entities = [ent for ent in all_entities if (ent in hist_df.columns or ent.rstrip('s') in hist_df.columns or ent+'s' in hist_df.columns) and ent in forecast_df.columns]
@@ -283,7 +324,7 @@ def run_forecast_visualization():
         if label == '3month':
             plot_aesthetic_dashboard(hist_df, forecast_df, "plots/general/combined_overview_dashboard.png")
 
-    print("All logical, publication-ready visualizations (PNG) generated successfully.")
+    print("All up-to-date symmetric visualizations (PNG) generated successfully.")
 
 if __name__ == "__main__":
     import seaborn as sns

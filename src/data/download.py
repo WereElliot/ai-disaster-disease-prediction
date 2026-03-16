@@ -72,7 +72,7 @@ def download_em_dat(config: Dict[str, Any], raw_path: Path) -> Path:
     """Simulate EM-DAT disaster records aligned with research objectives."""
     disasters = []
     locations = ["Nairobi", "Mombasa", "Kisumu", "Nakuru", "Eldoret"]
-    dates = pd.date_range(start="2017-01-01", end="2024-01-01", freq='ME')
+    dates = pd.date_range(start="2017-01-01", end="2026-03-01", freq='ME')
     
     for date in dates:
         for loc in locations:

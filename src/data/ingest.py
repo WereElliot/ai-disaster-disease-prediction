@@ -28,7 +28,7 @@ def load_and_preprocess_all(raw_paths: Dict[str, str], config: Dict[str, Any]) -
 
     # 2. WHO GHO (Health) - Using simulation as fallback for reliability
     print("Simulating health patterns for Kenya aligned with climate...")
-    dates = pd.date_range(start="2017-01-01", end="2024-01-01", freq='ME')
+    dates = pd.date_range(start="2017-01-01", end="2026-03-01", freq='ME')
     sim_cases = []
     for d in dates:
         # Link malaria outbreaks to rainfall patterns
