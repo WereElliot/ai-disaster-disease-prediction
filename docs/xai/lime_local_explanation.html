@@ -37097,17 +37097,17 @@
             var pp_div = top_div.append('div')
                                 .classed('lime predict_proba', true);
             var pp_svg = pp_div.append('svg').style('width', '100%');
-            var pp = new lime.PredictProba(pp_svg, ["No Outbreak", "Outbreak"], [0.00151747465133667, 0.9984825253486633]);
+            var pp = new lime.PredictProba(pp_svg, ["No Outbreak", "Outbreak"], [0.817017674446106, 0.18298231065273285]);
             
         
         var exp_div;
             var exp = new lime.Explanation(["No Outbreak", "Outbreak"]);
         
                 exp_div = top_div.append('div').classed('lime explanation', true);
-                exp.show([["precipitation > 0.15", 0.37698415820360454], ["157.24 < DL_Proxy_Feature <= 237.91", 0.19038916119957833], ["0.44 < temp_lag_1 <= 0.53", 0.04673317092070831], ["humidity_lag_2 <= 0.46", 0.028740648290136308], ["cases_lag_3 <= 100.00", 0.02435556155592181], ["0.42 < wind_speed_lag_3 <= 0.52", 0.02387014397657932], ["disaster_severity_lag_2 <= 0.00", 0.02219750672453029], ["drought_event_lag_2 <= 0.00", -0.021453773336030067], ["0.35 < temp <= 0.46", -0.01790706173680794], ["drought_event_lag_3 <= 0.00", 0.016964535832673853]], 1, exp_div);
+                exp.show([["0.35 < temp <= 0.46", 0.0], ["0.04 < precipitation <= 0.07", 0.0], ["0.53 < humidity <= 0.65", 0.0], ["0.42 < wind_speed <= 0.55", 0.0], ["flood_event <= 0.00", 0.0], ["drought_event <= 0.00", 0.0], ["disaster_severity <= 0.00", 0.0], ["0.35 < temp_lag_1 <= 0.44", 0.0], ["0.08 < precipitation_lag_1 <= 0.15", 0.0], ["0.54 < humidity_lag_1 <= 0.66", 0.0]], 1, exp_div);
                 
         var raw_div = top_div.append('div');
-            exp.show_raw_tabular([["precipitation", "0.31", 0.37698415820360454], ["DL_Proxy_Feature", "227.15", 0.19038916119957833], ["temp_lag_1", "0.51", 0.04673317092070831], ["humidity_lag_2", "0.43", 0.028740648290136308], ["cases_lag_3", "100.00", 0.02435556155592181], ["wind_speed_lag_3", "0.44", 0.02387014397657932], ["disaster_severity_lag_2", "0.00", 0.02219750672453029], ["drought_event_lag_2", "0.00", -0.021453773336030067], ["temp", "0.44", -0.01790706173680794], ["drought_event_lag_3", "0.00", 0.016964535832673853]], 1, raw_div);
+            exp.show_raw_tabular([["temp", "0.39", 0.0], ["precipitation", "0.05", 0.0], ["humidity", "0.58", 0.0], ["wind_speed", "0.45", 0.0], ["flood_event", "0.00", 0.0], ["drought_event", "0.00", 0.0], ["disaster_severity", "0.00", 0.0], ["temp_lag_1", "0.42", 0.0], ["precipitation_lag_1", "0.14", 0.0], ["humidity_lag_1", "0.65", 0.0]], 1, raw_div);
         
         </script>
         </body></html>

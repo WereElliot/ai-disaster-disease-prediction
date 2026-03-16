@@ -5,12 +5,13 @@ from src.data.eda import run_eda
 from src.models.train import train_hybrid_pipeline
 from src.models.xai import run_xai_pipeline
 from src.evaluation.evaluate import run_evaluation
+from src.evaluation.visualize_forecasts import run_forecast_visualization
 
 def main():
     parser = argparse.ArgumentParser(description="AI Disaster and Disease Prediction Platform")
-    parser.add_argument('--all', action='store_true', help="Run all phases (1-5) sequentially")
-    parser.add_argument('--mode', type=str, choices=['ingest', 'eda', 'train', 'explain', 'evaluate'],
-                        help="Mode: ingest (data pipeline), eda (Phase 2), train (model training), explain (XAI layer), evaluate (model evaluation)")
+    parser.add_argument('--all', action='store_true', help="Run all phases (1-6) sequentially")
+    parser.add_argument('--mode', type=str, choices=['ingest', 'eda', 'train', 'explain', 'evaluate', 'forecast'],
+                        help="Mode: ingest (data pipeline), eda (Phase 2), train (model training), explain (XAI layer), evaluate (model evaluation), forecast (visualization)")
     
     args = parser.parse_args()
     start_all = time.time()
@@ -31,6 +32,9 @@ def main():
         
         print("\n[Phase 5] Final Model Evaluation...")
         run_evaluation()
+
+        print("\n[Phase 6] Generating Forecast Visualizations...")
+        run_forecast_visualization()
         
         end_all = time.time()
         print(f"\nTotal Platform Runtime: {end_all - start_all:.2f} seconds")
@@ -46,6 +50,8 @@ def main():
         run_xai_pipeline()
     elif args.mode == 'evaluate':
         run_evaluation()
+    elif args.mode == 'forecast':
+        run_forecast_visualization()
     else:
         parser.print_help()
 
