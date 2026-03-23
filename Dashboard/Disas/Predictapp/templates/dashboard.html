@@ -298,7 +298,7 @@ body.light-mode .panel {background: var(--bg-card);border-color: var(--border)}
     <div class="panel-body">
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
         {% for image in forecast_images %}
-        <div style="text-align:center"><img src="{{ image.path }}" alt="{{ image.title }}" style="max-width:100%;height:auto;border-radius:8px"><div style="font-size:12px;color:var(--text-muted);margin-top:8px">{{ image.title }}</div></div>
+        <div style="text-align:center"><img src="{{ image.url }}" alt="{{ image.title }}" style="max-width:100%;height:auto;border-radius:8px"><div style="font-size:12px;color:var(--text-muted);margin-top:8px">{{ image.title }}</div></div>
         {% endfor %}
       </div>
     </div>
@@ -406,35 +406,9 @@ body.light-mode .panel {background: var(--bg-card);border-color: var(--border)}
     <div class="panel">
       <div class="panel-header"><span class="panel-title">Kenya Risk Map — Disease & Disaster</span><span class="panel-meta">Real-time overlay · March 2026</span></div>
       <div class="panel-body">
-        <div style="background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:10px;height:380px;position:relative;overflow:hidden">
-          <svg viewBox="0 0 500 400" style="width:100%;height:100%">
-            <defs>
-              <radialGradient id="rg1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ff4d6d" stop-opacity=".4"/><stop offset="100%" stop-color="#ff4d6d" stop-opacity="0"/></radialGradient>
-              <radialGradient id="rg2" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#f5a623" stop-opacity=".35"/><stop offset="100%" stop-color="#f5a623" stop-opacity="0"/></radialGradient>
-              <radialGradient id="rg3" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#4da6ff" stop-opacity=".3"/><stop offset="100%" stop-color="#4da6ff" stop-opacity="0"/></radialGradient>
-            </defs>
-            <rect width="500" height="400" fill="#0d1424"/>
-            <path d="M180 60 L200 40 L230 45 L260 35 L290 50 L310 80 L320 120 L300 160 L310 200 L290 240 L270 280 L250 320 L220 350 L200 340 L180 300 L160 260 L150 220 L140 180 L150 140 L160 100 Z" fill="#1a2540" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"/>
-            <ellipse cx="240" cy="190" rx="60" ry="60" fill="url(#rg1)"/>
-            <ellipse cx="280" cy="300" rx="50" ry="45" fill="url(#rg2)"/>
-            <ellipse cx="180" cy="260" rx="45" ry="40" fill="url(#rg3)"/>
-            <circle cx="240" cy="190" r="8" fill="#ff4d6d" opacity=".9"/>
-            <circle cx="240" cy="190" r="16" fill="none" stroke="#ff4d6d" stroke-width="1" opacity=".4"/>
-            <text x="252" y="186" font-size="10" fill="#ff6b84" font-family="DM Mono, monospace">Nairobi</text>
-            <text x="252" y="198" font-size="9" fill="#ff4d6d" font-family="DM Mono, monospace">94.2% · Critical</text>
-            <circle cx="280" cy="300" r="7" fill="#f5a623" opacity=".9"/>
-            <circle cx="280" cy="300" r="14" fill="none" stroke="#f5a623" stroke-width="1" opacity=".4"/>
-            <text x="292" y="296" font-size="10" fill="#f5b849" font-family="DM Mono, monospace">Mombasa</text>
-            <text x="292" y="308" font-size="9" fill="#f5a623" font-family="DM Mono, monospace">88.7% · High</text>
-            <circle cx="180" cy="260" r="7" fill="#4da6ff" opacity=".9"/>
-            <text x="148" y="256" font-size="10" fill="#6db8ff" font-family="DM Mono, monospace">Kisumu</text>
-            <text x="148" y="268" font-size="9" fill="#4da6ff" font-family="DM Mono, monospace">81.3% · High</text>
-            <circle cx="210" cy="160" r="6" fill="#f5a623" opacity=".7"/>
-            <text x="218" y="158" font-size="9" fill="#f5b849" font-family="DM Mono, monospace">Nakuru 72%</text>
-            <circle cx="175" cy="140" r="5" fill="#4da6ff" opacity=".6"/>
-            <text x="130" y="138" font-size="9" fill="#6db8ff" font-family="DM Mono, monospace">Eldoret 64%</text>
-          </svg>
-          <div style="position:absolute;bottom:12px;left:12px;display:flex;gap:10px;flex-wrap:wrap">
+        <div id="heatmap-container" style="background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:10px;height:380px;position:relative;overflow:hidden">
+          <div id="map" style="width:100%;height:100%;border-radius:8px"></div>
+          <div style="position:absolute;bottom:12px;left:12px;display:flex;gap:10px;flex-wrap:wrap;z-index:10">
             <span style="font-size:10px;display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.5);padding:3px 8px;border-radius:6px"><span style="width:8px;height:8px;border-radius:50%;background:#ff4d6d;display:inline-block"></span>Critical</span>
             <span style="font-size:10px;display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.5);padding:3px 8px;border-radius:6px"><span style="width:8px;height:8px;border-radius:50%;background:#f5a623;display:inline-block"></span>High</span>
             <span style="font-size:10px;display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.5);padding:3px 8px;border-radius:6px"><span style="width:8px;height:8px;border-radius:50%;background:#4da6ff;display:inline-block"></span>Moderate</span>
@@ -957,6 +931,9 @@ body.light-mode .panel {background: var(--bg-card);border-color: var(--border)}
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 <script>
 // ─── ROUTING ───
 const pageMeta = {
@@ -1068,6 +1045,9 @@ function initCharts(page) {
       {label:'Hybrid',  data:[91,92,90,91,94], backgroundColor:'rgba(245,166,35,0.7)', borderRadius:3}
     ]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top', labels:{color:tickColor,font:{size:11}}}, tooltip:tooltipDefaults}, scales:{x:{grid:{color:gridColor}, ticks:{color:tickColor}}, y:{min:80,max:100, grid:{color:gridColor}, ticks:{color:tickColor, callback:v=>v+'%'}}}}});
   }
+  if (page === 'riskmap') {
+    initHeatMap();
+  }
 }
 
 function runPrediction() {
@@ -1088,6 +1068,77 @@ function filterRiskZones(threat, btn) {
     const rowThreat = tr.getAttribute('data-threat');
     tr.style.display = (threat === 'All' || rowThreat === threat) ? '' : 'none';
   });
+}
+
+let heatmapInstance = null;
+
+function initHeatMap() {
+  const container = document.getElementById('map');
+  if (!container) return;
+  
+  // Destroy existing map if already initialized
+  if (window.heatmapLeaflet) {
+    window.heatmapLeaflet.remove();
+  }
+  
+  // Initialize Leaflet map centered on Kenya
+  const map = L.map('map', {
+    center: [-1.2833, 36.0826],
+    zoom: 6,
+    scrollWheelZoom: true,
+    attributionControl: false,
+    zoomControl: false
+  });
+  
+  // Add a dark tile layer
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19
+  }).addTo(map);
+  
+  // Heat map data points with lat, lng, intensity
+  const heatData = [
+    [-1.2866, 36.8172, 0.942],    // Nairobi - Critical
+    [-4.0435, 39.6682, 0.887],    // Mombasa - High
+    [-0.1057, 34.7617, 0.813],    // Kisumu - High
+    [-0.2833, 36.2667, 0.72],     // Nakuru - Moderate
+    [0.5143, 35.2799, 0.64],      // Eldoret - Low
+    [-1.0333, 37.0667, 0.3],      // Thika - Clear
+    [-0.4167, 36.95, 0.2]         // Nyeri - Clear
+  ];
+  
+  // Create heat layer with custom gradient
+  const heat = L.heatLayer(heatData, {
+    radius: 60,
+    blur: 40,
+    maxZoom: 13,
+    gradient: {0.0: '#4da6ff', 0.5: '#f5a623', 0.8: '#ff4d6d', 1.0: '#ff2444'},
+    minOpacity: 0.2
+  }).addTo(map);
+  
+  // Add markers for each location
+  const locations = [
+    {lat: -1.2866, lng: 36.8172, name: 'Nairobi', risk: '94.2%', level: 'Critical', color: '#ff4d6d'},
+    {lat: -4.0435, lng: 39.6682, name: 'Mombasa', risk: '88.7%', level: 'High', color: '#f5a623'},
+    {lat: -0.1057, lng: 34.7617, name: 'Kisumu', risk: '81.3%', level: 'High', color: '#f5a623'},
+    {lat: -0.2833, lng: 36.2667, name: 'Nakuru', risk: '72%', level: 'Moderate', color: '#4da6ff'},
+    {lat: 0.5143, lng: 35.2799, name: 'Eldoret', risk: '64%', level: 'Low', color: '#4da6ff'},
+    {lat: -1.0333, lng: 37.0667, name: 'Thika', risk: 'Clear', level: 'Clear', color: '#6db8ff'},
+    {lat: -0.4167, lng: 36.95, name: 'Nyeri', risk: 'Clear', level: 'Clear', color: '#6db8ff'}
+  ];
+  
+  locations.forEach(loc => {
+    const popup = `<div style="font-family: DM Mono; font-size: 11px"><strong>${loc.name}</strong><br>Risk: <span style="color: ${loc.color}">${loc.risk}</span><br>Level: ${loc.level}</div>`;
+    L.circleMarker([loc.lat, loc.lng], {
+      radius: 8,
+      fillColor: loc.color,
+      color: loc.color,
+      weight: 2,
+      opacity: 0.8,
+      fillOpacity: 0.7
+    }).bindPopup(popup).addTo(map);
+  });
+  
+  window.heatmapLeaflet = map;
 }
 
 function setTheme(isLight) {

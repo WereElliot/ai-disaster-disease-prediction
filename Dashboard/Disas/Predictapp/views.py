@@ -153,24 +153,43 @@ def dashboard_view(request):
             ]
 
         # Get forecast images
-        plots_dir = os.path.join(base_path, 'plots', 'forecasts')
+        plots_dir = os.path.join(base_path, 'static', 'plots', 'forecasts')
         forecast_images = []
         if os.path.exists(plots_dir):
-            # Get 1week forecasts for key diseases
-            key_forecasts = ['malaria_1week_forecast.png', 'cholera_1week_forecast.png', 'flood_1week_forecast.png']
+            # Get all available 1week forecasts for key diseases/disasters
+            key_forecasts = [
+                'malaria_1week_forecast.png',
+                'cholera_1week_forecast.png', 
+                'flood_1week_forecast.png',
+                'dengue_1week_forecast.png',
+                'drought_1week_forecast.png',
+                'cyclone_1week_forecast.png'
+            ]
             for img in key_forecasts:
                 img_path = os.path.join(plots_dir, img)
                 if os.path.exists(img_path):
                     forecast_images.append({
-                        'path': f'/static/plots/forecasts/{img}',
+                        'url': f'/static/plots/forecasts/{img}',
+                        'title': img.replace('_', ' ').replace('.png', '').title()
+                    })
+            
+            # If no specific forecasts found, get all available images
+            if not forecast_images:
+                all_images = [f for f in os.listdir(plots_dir) if f.endswith('.png') and 'copy' not in f.lower()]
+                for img in all_images[:6]:  # Limit to 6 images for display
+                    forecast_images.append({
+                        'url': f'/static/plots/forecasts/{img}',
                         'title': img.replace('_', ' ').replace('.png', '').title()
                     })
         else:
-            # Fallback
+            # Fallback with real paths from your forecast folder
             forecast_images = [
-                {'path': '/static/plots/forecasts/malaria_1week_forecast.png', 'title': 'Malaria 1 Week'},
-                {'path': '/static/plots/forecasts/cholera_1week_forecast.png', 'title': 'Cholera 1 Week'},
-                {'path': '/static/plots/forecasts/flood_1week_forecast.png', 'title': 'Flood 1 Week'},
+                {'url': '/static/plots/forecasts/malaria_1week_forecast.png', 'title': 'Malaria 1 Week'},
+                {'url': '/static/plots/forecasts/cholera_1week_forecast.png', 'title': 'Cholera 1 Week'},
+                {'url': '/static/plots/forecasts/flood_1week_forecast.png', 'title': 'Flood 1 Week'},
+                {'url': '/static/plots/forecasts/dengue_1week_forecast.png', 'title': 'Dengue 1 Week'},
+                {'url': '/static/plots/forecasts/drought_1week_forecast.png', 'title': 'Drought 1 Week'},
+                {'url': '/static/plots/forecasts/cyclone_1week_forecast.png', 'title': 'Cyclone 1 Week'},
             ]
 
         # Get latest climate data
@@ -227,6 +246,8 @@ def dashboard_view(request):
             'model_f1': round(model_f1_score * 100, 1),
             'model_accuracy': round(model_accuracy * 100, 1),
         }
+        
+        return render(request, 'dashboard.html', context)
     except Exception as e:
         # Fallback to static data
         context = {
