@@ -2,7 +2,7 @@
 
 ## 1. Data Overview & Quality
 - **Dataset Source**: NASA POWER + WHO GHO + EM-DAT Integrated Data.
-- **Samples**: 421 monthly resampled observations.
+- **Samples**: 550 monthly resampled observations.
 - **Features**: ['temp', 'precipitation', 'humidity', 'wind_speed', 'malaria_cases', 'flood_event', 'drought_event', 'disaster_severity', 'cases', 'date', 'location']
 
 ## 2. Visual Analysis
