@@ -16,14 +16,13 @@ This document provides a step-by-step guide to verify the functionality of the A
 ## 2. Full Pipeline Execution (Recommended)
 **Goal**: Run all phases (1-5) sequentially to verify the entire system.
 - **Action**: Run the full pipeline command:
-  ```powershell
+  ```powershellpython src/main.py --all
   $env:PYTHONPATH = '.'; python src/main.py --all
   ```
 - **Expected Results**:
   - **Runtime**: ~25-30 seconds.
   - **Console Output**: "Verification Summary: All phases completed successfully. Reports saved in docs/."
   - **Artifacts**: All reports and plots generated in `docs/` and models saved in `models/`.
-
 ---
 
 ## 3. Phase 1: Data Ingest & Pipeline

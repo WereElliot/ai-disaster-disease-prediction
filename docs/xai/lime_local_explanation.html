@@ -37089,25 +37089,25 @@
 /***/ })
 /******/ ]);
 //# sourceMappingURL=bundle.js.map </script></head><body>
-        <div class="lime top_div" id="top_divQJGIQIIXKHYBJXP"></div>
+        <div class="lime top_div" id="top_divL7HSE0M54BGKKW4"></div>
         
         <script>
-        var top_div = d3.select('#top_divQJGIQIIXKHYBJXP').classed('lime top_div', true);
+        var top_div = d3.select('#top_divL7HSE0M54BGKKW4').classed('lime top_div', true);
         
             var pp_div = top_div.append('div')
                                 .classed('lime predict_proba', true);
             var pp_svg = pp_div.append('svg').style('width', '100%');
-            var pp = new lime.PredictProba(pp_svg, ["No Outbreak", "Outbreak"], [0.817017674446106, 0.18298231065273285]);
+            var pp = new lime.PredictProba(pp_svg, ["No Outbreak", "Outbreak"], [0.44565045833587646, 0.5543495416641235]);
             
         
         var exp_div;
             var exp = new lime.Explanation(["No Outbreak", "Outbreak"]);
         
                 exp_div = top_div.append('div').classed('lime explanation', true);
-                exp.show([["0.35 < temp <= 0.46", 0.0], ["0.04 < precipitation <= 0.07", 0.0], ["0.53 < humidity <= 0.65", 0.0], ["0.42 < wind_speed <= 0.55", 0.0], ["flood_event <= 0.00", 0.0], ["drought_event <= 0.00", 0.0], ["disaster_severity <= 0.00", 0.0], ["0.35 < temp_lag_1 <= 0.44", 0.0], ["0.08 < precipitation_lag_1 <= 0.15", 0.0], ["0.54 < humidity_lag_1 <= 0.66", 0.0]], 1, exp_div);
+                exp.show([["cases_lag_3 <= 100.00", 0.0756241761276064], ["temp_lag_1 > 0.53", 0.059141255887341544], ["cases_lag_2 <= 100.00", 0.053666604442508856], ["wind_speed_lag_1 > 0.67", 0.05159870364526417], ["disaster_severity_lag_3 <= 0.00", -0.03908151075280323], ["precipitation > 0.14", 0.03850261113923633], ["humidity > 0.65", 0.03262029316339845], ["temp_lag_2 > 0.53", 0.030838726182496234], ["0.55 < wind_speed <= 0.68", -0.022065090506289613], ["0.35 < temp <= 0.46", -0.020836730410366596]], 1, exp_div);
                 
         var raw_div = top_div.append('div');
-            exp.show_raw_tabular([["temp", "0.39", 0.0], ["precipitation", "0.05", 0.0], ["humidity", "0.58", 0.0], ["wind_speed", "0.45", 0.0], ["flood_event", "0.00", 0.0], ["drought_event", "0.00", 0.0], ["disaster_severity", "0.00", 0.0], ["temp_lag_1", "0.42", 0.0], ["precipitation_lag_1", "0.14", 0.0], ["humidity_lag_1", "0.65", 0.0]], 1, raw_div);
+            exp.show_raw_tabular([["cases_lag_3", "100.00", 0.0756241761276064], ["temp_lag_1", "0.64", 0.059141255887341544], ["cases_lag_2", "100.00", 0.053666604442508856], ["wind_speed_lag_1", "0.74", 0.05159870364526417], ["disaster_severity_lag_3", "0.00", -0.03908151075280323], ["precipitation", "0.40", 0.03850261113923633], ["humidity", "0.81", 0.03262029316339845], ["temp_lag_2", "0.63", 0.030838726182496234], ["wind_speed", "0.64", -0.022065090506289613], ["temp", "0.38", -0.020836730410366596]], 1, raw_div);
         
         </script>
         </body></html>
