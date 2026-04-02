@@ -1,0 +1,1518 @@
+{% extends "community_dashboard/base_public.html" %}
+{% load static %}
+
+{% block page_styles %}
+  <style>
+    .prediction-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.12fr) minmax(290px, 0.88fr);
+      gap: 1.5rem;
+      align-items: stretch;
+      margin-bottom: 1.5rem;
+    }
+
+    .prediction-hero p {
+      margin: 1rem 0 0;
+      max-width: 62ch;
+    }
+
+    .hero-guide h2 {
+      font-size: 1.65rem;
+      line-height: 1.08;
+      margin-bottom: 0.4rem;
+    }
+
+    .prediction-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(290px, 0.75fr);
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .prediction-panel,
+    .support-panel,
+    .empty-state,
+    .results-header,
+    .results-table-card,
+    .action-plan {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      box-shadow: var(--shadow-soft);
+      padding: 1.5rem;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: flex-start;
+      margin-bottom: 0.8rem;
+    }
+
+    .panel-head h2,
+    .panel-head h3 {
+      font-family: var(--font-display);
+      font-size: 1.55rem;
+      letter-spacing: -0.03em;
+    }
+
+    .region-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.7rem 0.95rem;
+      border-radius: 999px;
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .panel-intro {
+      color: var(--text-secondary);
+      margin: 0 0 1.2rem;
+      max-width: 60ch;
+    }
+
+    .search-guidance {
+      display: grid;
+      gap: 0.9rem;
+    }
+
+    .search-guidance p {
+      margin: 0;
+      color: var(--text-secondary);
+    }
+
+    .search-guidance strong {
+      color: var(--text-primary);
+    }
+
+    .detail-list {
+      display: grid;
+      gap: 0.75rem;
+      margin-top: 0.25rem;
+    }
+
+    .detail-item {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      padding: 0.9rem 1rem;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--bg-soft);
+      color: var(--text-secondary);
+    }
+
+    .detail-item i {
+      color: var(--accent-sky);
+      margin-top: 0.1rem;
+    }
+
+    .loading-block,
+    .error-banner {
+      margin-top: 1rem;
+      border-radius: 18px;
+      padding: 1rem;
+    }
+
+    .loading-block {
+      display: grid;
+      gap: 0.7rem;
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 4px solid rgba(44, 169, 232, 0.18);
+      border-top-color: var(--accent-sky);
+      animation: spin 0.9s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .error-banner {
+      background: rgba(255, 107, 135, 0.12);
+      border: 1px solid rgba(255, 107, 135, 0.22);
+      color: #b42342;
+      font-weight: 700;
+    }
+
+    body.dark-mode .error-banner {
+      color: #ff9eb0;
+    }
+
+    .region-list {
+      margin-top: 1rem;
+    }
+
+    .empty-state {
+      display: grid;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .empty-state h2 {
+      font-family: var(--font-display);
+      font-size: 1.7rem;
+      letter-spacing: -0.03em;
+      margin: 0;
+    }
+
+    .empty-state p {
+      margin: 0;
+      color: var(--text-secondary);
+      max-width: 62ch;
+    }
+
+    .empty-points {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .empty-points div {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      color: var(--text-secondary);
+    }
+
+    .empty-points i {
+      color: var(--accent-sky);
+      margin-top: 0.15rem;
+    }
+
+    .results-section {
+      display: grid;
+      gap: 1.25rem;
+    }
+
+    .results-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+
+    .results-header h2 {
+      font-family: var(--font-display);
+      font-size: 1.7rem;
+      letter-spacing: -0.03em;
+      margin: 0.4rem 0 0;
+    }
+
+    .results-header p {
+      margin: 0.35rem 0 0;
+      color: var(--text-secondary);
+      max-width: 58ch;
+    }
+
+    .result-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      margin-top: 1rem;
+    }
+
+    .meta-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.58rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--bg-soft);
+      color: var(--text-secondary);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .language-selector {
+      display: inline-flex;
+      gap: 0.55rem;
+      flex-wrap: wrap;
+    }
+
+    .lang-btn {
+      border: 1px solid var(--border);
+      background: var(--bg-panel);
+      color: var(--text-secondary);
+      padding: 0.68rem 0.9rem;
+      border-radius: 999px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .lang-btn.active {
+      background: rgba(44, 169, 232, 0.16);
+      border-color: var(--border-strong);
+      color: var(--text-primary);
+    }
+
+    .results-table-card {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .table-toolbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .table-toolbar h3 {
+      margin: 0.35rem 0 0;
+      font-family: var(--font-display);
+      font-size: 1.45rem;
+      letter-spacing: -0.03em;
+    }
+
+    .table-actions {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .table-action-buttons {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .table-shell {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      background: var(--bg-soft);
+    }
+
+    .risk-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+
+    .risk-table thead th {
+      text-align: left;
+      padding: 1rem 1rem 0.95rem;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 800;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    body.dark-mode .risk-table thead th {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .risk-table tbody td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    .risk-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .risk-subject {
+      display: flex;
+      gap: 0.85rem;
+      align-items: flex-start;
+    }
+
+    .risk-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-card);
+      color: var(--accent-sky);
+      font-size: 1.1rem;
+      border: 1px solid var(--border);
+      flex: 0 0 auto;
+    }
+
+    .risk-name {
+      font-family: var(--font-display);
+      font-size: 1.06rem;
+      line-height: 1.2;
+    }
+
+    .risk-type {
+      color: var(--text-muted);
+      font-size: 0.84rem;
+      margin-top: 0.15rem;
+    }
+
+    .risk-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.35rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .risk-chip.critical {
+      background: rgba(255, 107, 135, 0.16);
+      color: #c73b5a;
+    }
+
+    .risk-chip.high {
+      background: rgba(247, 185, 85, 0.18);
+      color: #b67300;
+    }
+
+    .risk-chip.medium {
+      background: rgba(44, 169, 232, 0.16);
+      color: #0b7eb8;
+    }
+
+    .risk-chip.low {
+      background: rgba(56, 184, 131, 0.16);
+      color: #1f8d64;
+    }
+
+    body.dark-mode .risk-chip.critical {
+      color: #ffb5c2;
+    }
+
+    body.dark-mode .risk-chip.high {
+      color: #ffd694;
+    }
+
+    body.dark-mode .risk-chip.medium {
+      color: #8fe3ff;
+    }
+
+    body.dark-mode .risk-chip.low {
+      color: #9ef1cd;
+    }
+
+    .confidence-cell {
+      min-width: 190px;
+    }
+
+    .confidence-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.45rem;
+      color: var(--text-secondary);
+      font-size: 0.88rem;
+    }
+
+    .confidence-label strong {
+      font-family: var(--font-mono);
+      color: var(--text-primary);
+    }
+
+    .risk-meter {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(16, 59, 114, 0.08);
+      overflow: hidden;
+    }
+
+    body.dark-mode .risk-meter {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .risk-meter span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+    }
+
+    .risk-meter span.critical {
+      background: rgba(255, 107, 135, 0.7);
+    }
+
+    .risk-meter span.high {
+      background: rgba(247, 185, 85, 0.8);
+    }
+
+    .risk-meter span.medium {
+      background: rgba(44, 169, 232, 0.78);
+    }
+
+    .risk-meter span.low {
+      background: rgba(56, 184, 131, 0.8);
+    }
+
+    .risk-drivers {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+    }
+
+    .driver-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.38rem 0.58rem;
+      border-radius: 999px;
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: capitalize;
+    }
+
+    .action-plan-content {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .plan-tabs {
+      display: flex;
+      gap: 0.7rem;
+      flex-wrap: wrap;
+      margin-top: 0.35rem;
+    }
+
+    .plan-tab {
+      border: 1px solid var(--border);
+      background: var(--bg-panel);
+      color: var(--text-secondary);
+      padding: 0.7rem 0.95rem;
+      border-radius: 999px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .plan-tab.active {
+      background: rgba(44, 169, 232, 0.16);
+      border-color: var(--border-strong);
+      color: var(--text-primary);
+    }
+
+    .plan-brief {
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(248, 252, 255, 0.95), rgba(233, 245, 255, 0.86));
+      border-radius: 24px;
+      overflow: hidden;
+    }
+
+    body.dark-mode .plan-brief {
+      background: linear-gradient(180deg, rgba(13, 32, 56, 0.92), rgba(9, 26, 46, 0.88));
+    }
+
+    .plan-brief-section {
+      padding: 1.1rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .plan-brief-section:last-child {
+      border-bottom: none;
+    }
+
+    .plan-section-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .plan-section-top h4 {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 1.08rem;
+    }
+
+    .plan-brief-section ul {
+      margin: 0;
+      padding-left: 1.1rem;
+      color: var(--text-secondary);
+      display: grid;
+      gap: 0.55rem;
+    }
+
+    .hazard-plan-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+    }
+
+    .hazard-plan-card {
+      border: 1px solid var(--border);
+      background: var(--bg-soft);
+      border-radius: 22px;
+      padding: 1rem;
+      display: grid;
+      gap: 0.8rem;
+    }
+
+    .hazard-plan-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.75rem;
+      align-items: flex-start;
+    }
+
+    .hazard-plan-top h4 {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 1.06rem;
+    }
+
+    .hazard-plan-meta {
+      color: var(--text-muted);
+      font-size: 0.84rem;
+      margin-top: 0.2rem;
+    }
+
+    .hazard-plan-card ul {
+      margin: 0;
+      padding-left: 1.1rem;
+      color: var(--text-secondary);
+      display: grid;
+      gap: 0.45rem;
+    }
+
+    .hazard-empty {
+      border: 1px dashed var(--border);
+      border-radius: 22px;
+      padding: 1rem;
+      color: var(--text-secondary);
+      background: var(--bg-soft);
+    }
+
+    @media (max-width: 980px) {
+      .prediction-hero,
+      .prediction-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .results-header {
+        flex-direction: column;
+      }
+
+      .table-actions {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <section class="hero-shell prediction-hero">
+    <div>
+      <h1>Climate-region predictions for <span>public community readiness</span></h1>
+      <p class="page-copy">
+        Enter a Kenya climatic region in the top search bar, press Enter, and
+        this page will load the matching prediction view automatically. Risk
+        signals are interpreted by climatic region, then displayed with a
+        representative county and response guidance that the public can follow.
+      </p>
+    </div>
+
+    <aside class="panel-card hero-guide">
+      <h2>Search, review, then act</h2>
+      <ul class="info-list" style="margin-top: 1rem">
+        <li><i class="bi bi-search"></i> Type a climatic region in the top bar and press Enter.</li>
+        <li><i class="bi bi-graph-up-arrow"></i> Review the risk table for disease and disaster exposure.</li>
+        <li><i class="bi bi-shield-check"></i> Use the action plan to guide immediate and ongoing preparedness.</li>
+      </ul>
+    </aside>
+  </section>
+
+  <section class="prediction-grid">
+    <div class="prediction-panel">
+      <div class="panel-head">
+        <div>
+          <h2>Run predictions from the top bar</h2>
+        </div>
+        <div class="region-pill" id="selectedRegionBadge">
+          <i class="bi bi-cloud-sun"></i>
+          Awaiting climatic region search
+        </div>
+      </div>
+
+      <p class="panel-intro">
+        The top navigation is now the main prediction control. Search for a
+        supported Kenya climatic region and the page will generate risk outputs
+        automatically without a county dropdown.
+      </p>
+
+      <div class="search-guidance">
+        <p>
+          <strong>Current search:</strong>
+          <span id="requestedRegionText">No climatic region entered yet.</span>
+        </p>
+        <div class="detail-list">
+          <div class="detail-item">
+            <i class="bi bi-pin-map"></i>
+            <div>
+              Predictions are displayed with the matched climatic region and a
+              representative county from the model dataset.
+            </div>
+          </div>
+          <div class="detail-item">
+            <i class="bi bi-arrow-repeat"></i>
+            <div>
+              To switch regions, use the top-bar search again. The page will
+              refresh and run the new prediction automatically.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="loadingIndicator" class="loading-block" hidden>
+        <div class="spinner"></div>
+        <div>Analyzing climatic conditions and generating the regional outlook...</div>
+      </div>
+
+      <div id="errorMessage" class="error-banner" hidden></div>
+    </div>
+
+    <aside class="support-panel">
+      <h3>Supported Kenya climatic regions</h3>
+      <p class="panel-intro">
+        Predictions remain grounded in the same seven climatic regions used
+        across the platform, keeping public guidance consistent with the admin
+        dashboard and underlying model rules.
+      </p>
+      <div class="tag-list region-list">
+        {% for region in climate_regions %}
+          <span class="tag">{{ region.label }}</span>
+        {% endfor %}
+      </div>
+    </aside>
+  </section>
+
+  <section id="emptyState" class="empty-state">
+    <h2>Search for a climatic region to open the prediction view</h2>
+    <p>
+      Use the search input in the top bar to enter one of Kenya's supported
+      climatic regions. After you press Enter, this page will show a risk table,
+      a response playbook, and share or download options for that region.
+    </p>
+    <div class="empty-points">
+      <div>
+        <i class="bi bi-check2-circle"></i>
+        <span>Examples: Central Highlands, Rift Valley, Lake Basin, or Coastal Lowlands.</span>
+      </div>
+      <div>
+        <i class="bi bi-check2-circle"></i>
+        <span>The entered region is matched to a representative county for the model output.</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="resultsSection" class="results-section" hidden>
+    <div class="results-header">
+      <div>
+        <h2>Risk signals for <span id="selectedRegionLabel">your climatic region</span></h2>
+        <p>
+          Disease and disaster alerts are summarized below for fast public
+          understanding, together with the representative county used for the
+          displayed model output.
+        </p>
+        <div class="result-meta">
+          <span class="meta-chip">
+            <i class="bi bi-geo-alt"></i>
+            Representative county: <span id="selectedCountyLabel">Not loaded</span>
+          </span>
+          <span class="meta-chip">
+            <i class="bi bi-clock-history"></i>
+            Updated: <span id="updatedTimestamp">Pending</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="results-table-card">
+      <div class="table-toolbar">
+        <div>
+          <h3>Risk table</h3>
+        </div>
+        <div class="table-actions">
+          <div class="language-selector">
+            <button class="lang-btn active" data-lang="en" type="button">English</button>
+            <button class="lang-btn" data-lang="sw" type="button">Kiswahili</button>
+          </div>
+          <div class="table-action-buttons">
+            <button id="downloadReportBtn" class="btn-soft" type="button">
+              <i class="bi bi-download"></i>
+              Download PDF
+            </button>
+            <button id="shareBtn" class="btn-soft" type="button">
+              <i class="bi bi-share"></i>
+              Share with Community
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-shell">
+        <table class="risk-table">
+          <thead>
+            <tr>
+              <th>Condition</th>
+              <th>Risk level</th>
+              <th>Confidence</th>
+              <th>Key drivers</th>
+            </tr>
+          </thead>
+          <tbody id="riskTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="action-plan">
+      <div class="panel-head">
+        <div>
+          <h3>Integrated Response Guidance for Disease and Disaster Risks</h3>
+        </div>
+      </div>
+      <div id="actionPlanContent" class="action-plan-content"></div>
+      <div class="plan-tabs" id="planTabs">
+        <button class="plan-tab active" data-filter="all" type="button">All Risks</button>
+        <button class="plan-tab" data-filter="disease" type="button">Diseases</button>
+        <button class="plan-tab" data-filter="disaster" type="button">Disasters</button>
+      </div>
+      <div id="hazardPlanGrid" class="hazard-plan-grid"></div>
+    </div>
+  </section>
+{% endblock %}
+
+{% block page_scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      let currentRegion = "";
+      let currentPredictions = null;
+      let currentLanguage = "en";
+      let currentActionPlan = null;
+      let currentPlanFilter = "all";
+
+      const loadingIndicator = document.getElementById("loadingIndicator");
+      const resultsSection = document.getElementById("resultsSection");
+      const emptyState = document.getElementById("emptyState");
+      const riskTableBody = document.getElementById("riskTableBody");
+      const actionPlanContent = document.getElementById("actionPlanContent");
+      const hazardPlanGrid = document.getElementById("hazardPlanGrid");
+      const downloadBtn = document.getElementById("downloadReportBtn");
+      const shareBtn = document.getElementById("shareBtn");
+      const selectedRegionLabel = document.getElementById("selectedRegionLabel");
+      const selectedCountyLabel = document.getElementById("selectedCountyLabel");
+      const selectedRegionBadge = document.getElementById("selectedRegionBadge");
+      const requestedRegionText = document.getElementById("requestedRegionText");
+      const updatedTimestamp = document.getElementById("updatedTimestamp");
+      const errorMessage = document.getElementById("errorMessage");
+
+      const predictUrl = "{% url 'community_dashboard:api_predict' %}";
+      const actionPlanUrl = "{% url 'community_dashboard:api_action_plan' %}";
+      const initialRegion = "{{ initial_region|default:''|escapejs }}";
+      const garamondFontUrl = "{% static 'fonts/EBGaramond.ttf' %}";
+      let garamondFontData = null;
+
+      const translations = {
+        en: {
+          risk: {
+            critical: "Critical Risk",
+            high: "High Risk",
+            medium: "Medium Risk",
+            low: "Low Risk",
+          },
+          probability: "Outbreak Probability",
+          no_alerts: "No active alerts at this time.",
+          immediate: "Priority Steps to Start Now",
+          weekly: "Near-Term Follow-Up for the Coming Days",
+          ongoing: "Continuous Preparedness Measures",
+          emergency: "Essential Response Contact Lines",
+          response_brief_title: "Integrated Response Guidance for Disease and Disaster Risks",
+          no_immediate: "No immediate actions required",
+          continue_monitoring: "Continue routine monitoring",
+          stay_informed: "Stay informed through local bulletins",
+          report_first: "Please search for a climatic region first.",
+          share_summary: "FutureGuard alert for",
+          share_copied: "Prediction summary copied to clipboard.",
+          plan_unavailable: "Unable to generate an action plan right now.",
+          plan_for_all: "Actions for all detected diseases and disasters",
+          plan_for_disease: "Actions for disease risks",
+          plan_for_disaster: "Actions for disaster risks",
+          no_tab_items: "No matching hazards in this view right now.",
+          action_items: "Action items",
+          pdf_unavailable: "PDF export is not available right now. Please reload the page and try again.",
+        },
+        sw: {
+          risk: {
+            critical: "Hatari Kubwa Sana",
+            high: "Hatari Kubwa",
+            medium: "Hatari ya Kati",
+            low: "Hatari Ndogo",
+          },
+          probability: "Uwezekano wa Mlipuko",
+          no_alerts: "Hakuna tahadhari kwa sasa.",
+          immediate: "Hatua Muhimu za Kuanza Sasa",
+          weekly: "Hatua za Muda Mfupi kwa Siku Zijazo",
+          ongoing: "Hatua Endelevu za Uangalizi",
+          emergency: "Nambari Muhimu za Mawasiliano",
+          response_brief_title: "Mwongozo Jumuishi wa Hatua kwa Hatari za Magonjwa na Majanga",
+          no_immediate: "Hakuna hatua za haraka zinazohitajika",
+          continue_monitoring: "Endelea na ufuatiliaji wa kawaida",
+          stay_informed: "Endelea kupata taarifa kupitia matangazo ya eneo lako",
+          report_first: "Tafadhali tafuta climatic region kwanza.",
+          share_summary: "Tahadhari ya FutureGuard kwa",
+          share_copied: "Muhtasari wa utabiri umewekwa kwenye clipboard.",
+          plan_unavailable: "Haiwezekani kutengeneza mpango wa hatua kwa sasa.",
+          plan_for_all: "Hatua kwa magonjwa na majanga yote yaliyogunduliwa",
+          plan_for_disease: "Hatua kwa hatari za magonjwa",
+          plan_for_disaster: "Hatua kwa hatari za majanga",
+          no_tab_items: "Hakuna hatari zinazolingana na mwonekano huu kwa sasa.",
+          action_items: "Hatua za kuchukua",
+          pdf_unavailable: "Haiwezekani kupakua PDF kwa sasa. Pakia ukurasa upya kisha ujaribu tena.",
+        },
+      };
+
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+          const cookies = document.cookie.split(";");
+          for (let i = 0; i < cookies.length; i += 1) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === `${name}=`) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+
+      const csrftoken = getCookie("csrftoken");
+
+      function formatRegionLabel(value) {
+        return value ? value.replace(/\s+/g, " ").trim() : "";
+      }
+
+      function getRequestedRegion() {
+        const params = new URLSearchParams(window.location.search);
+        return formatRegionLabel(params.get("region") || initialRegion);
+      }
+
+      function showError(message) {
+        errorMessage.textContent = message;
+        errorMessage.hidden = false;
+      }
+
+      function hideError() {
+        errorMessage.hidden = true;
+        errorMessage.textContent = "";
+      }
+
+      function updateSearchState(predictions) {
+        const requestedLabel = currentRegion || "No climatic region entered yet.";
+        const climateRegion = predictions?.climate_region || currentRegion || "your climatic region";
+        const countyLabel = predictions?.county || "Not loaded";
+        const timestampLabel = predictions?.timestamp
+          ? new Date(predictions.timestamp).toLocaleString()
+          : "Pending";
+
+        requestedRegionText.textContent = requestedLabel;
+        selectedRegionLabel.textContent = climateRegion;
+        selectedCountyLabel.textContent = countyLabel;
+        updatedTimestamp.textContent = timestampLabel;
+        selectedRegionBadge.innerHTML = predictions
+          ? `<i class="bi bi-cloud-sun"></i> ${climateRegion}`
+          : '<i class="bi bi-cloud-sun"></i> Awaiting climatic region search';
+      }
+
+      async function runPrediction(regionQuery) {
+        currentRegion = formatRegionLabel(regionQuery);
+        currentPredictions = null;
+        currentActionPlan = null;
+        updateSearchState(null);
+
+        if (!currentRegion) {
+          emptyState.hidden = false;
+          resultsSection.hidden = true;
+          hazardPlanGrid.innerHTML = "";
+          hideError();
+          return;
+        }
+
+        hideError();
+        loadingIndicator.hidden = false;
+        resultsSection.hidden = true;
+        emptyState.hidden = true;
+        hazardPlanGrid.innerHTML = "";
+        actionPlanContent.innerHTML = "";
+
+        try {
+          const response = await fetch(predictUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": csrftoken,
+            },
+            body: JSON.stringify({ region: currentRegion }),
+          });
+
+          const payload = await response.json();
+
+          if (!response.ok) {
+            throw new Error(payload.error || "Prediction failed");
+          }
+
+          currentPredictions = payload;
+          displayResults(currentPredictions);
+          await generateActionPlan(currentPredictions);
+          resultsSection.hidden = false;
+        } catch (error) {
+          console.error(error);
+          showError(error.message || "Failed to generate predictions. Please try again.");
+          emptyState.hidden = false;
+        } finally {
+          loadingIndicator.hidden = true;
+        }
+      }
+
+      function displayResults(predictions) {
+        const riskItems = [
+          { id: "malaria", name: "Malaria", type: "Disease", icon: '<i class="bi bi-bug"></i>' },
+          { id: "cholera", name: "Cholera", type: "Disease", icon: '<i class="bi bi-virus"></i>' },
+          { id: "dengue", name: "Dengue", type: "Disease", icon: '<i class="bi bi-bug-fill"></i>' },
+          { id: "floods", name: "Floods", type: "Disaster", icon: '<i class="bi bi-water"></i>' },
+          { id: "drought", name: "Drought", type: "Disaster", icon: '<i class="bi bi-brightness-high-fill"></i>' },
+        ];
+
+        const rows = riskItems.map((item) => {
+          const data = predictions[item.id];
+          if (!data) {
+            return "";
+          }
+
+          const riskClass = data.risk.toLowerCase();
+          const riskText = translations[currentLanguage].risk[riskClass] || data.risk;
+          const confidence = Math.min(data.confidence, 100);
+          const drivers = (data.drivers || []).map((driver) => (
+            `<span class="driver-chip">${driver}</span>`
+          )).join("");
+
+          return `
+            <tr>
+              <td>
+                <div class="risk-subject">
+                  <div class="risk-icon">${item.icon}</div>
+                  <div>
+                    <div class="risk-name">${item.name}</div>
+                    <div class="risk-type">${item.type}</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="risk-chip ${riskClass}">${riskText}</span>
+              </td>
+              <td class="confidence-cell">
+                <div class="confidence-label">
+                  <span>${translations[currentLanguage].probability}</span>
+                  <strong>${confidence}%</strong>
+                </div>
+                <div class="risk-meter">
+                  <span class="${riskClass}" style="width: ${confidence}%"></span>
+                </div>
+              </td>
+              <td>
+                <div class="risk-drivers">${drivers}</div>
+              </td>
+            </tr>
+          `;
+        });
+
+        riskTableBody.innerHTML = rows.join("");
+        updateSearchState(predictions);
+      }
+
+      async function generateActionPlan(predictions) {
+        try {
+          const response = await fetch(actionPlanUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": csrftoken,
+            },
+            body: JSON.stringify({
+              county: predictions.climate_region || currentRegion,
+              predictions: predictions,
+              language: currentLanguage,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Action plan generation failed");
+          }
+
+          currentActionPlan = await response.json();
+          displayActionPlan(currentActionPlan);
+        } catch (error) {
+          console.error(error);
+          hazardPlanGrid.innerHTML = "";
+          actionPlanContent.innerHTML = `<p>${translations[currentLanguage].plan_unavailable}</p>`;
+        }
+      }
+
+      function displayActionPlan(plan) {
+        const t = translations[currentLanguage];
+
+        actionPlanContent.innerHTML = `
+          <div class="plan-brief">
+            <section class="plan-brief-section">
+              <div class="plan-section-top">
+                <div><h4>${t.immediate}</h4></div>
+              </div>
+              <ul>
+                ${(plan.immediate_actions && plan.immediate_actions.length
+                  ? plan.immediate_actions
+                  : [t.no_immediate]).map((item) => `<li>${item}</li>`).join("")}
+              </ul>
+            </section>
+            <section class="plan-brief-section">
+              <div class="plan-section-top">
+                <div><h4>${t.weekly}</h4></div>
+              </div>
+              <ul>
+                ${(plan.weekly_actions && plan.weekly_actions.length
+                  ? plan.weekly_actions
+                  : [t.continue_monitoring]).map((item) => `<li>${item}</li>`).join("")}
+              </ul>
+            </section>
+            <section class="plan-brief-section">
+              <div class="plan-section-top">
+                <div><h4>${t.ongoing}</h4></div>
+              </div>
+              <ul>
+                ${(plan.ongoing_actions && plan.ongoing_actions.length
+                  ? plan.ongoing_actions
+                  : [t.stay_informed]).map((item) => `<li>${item}</li>`).join("")}
+              </ul>
+            </section>
+            <section class="plan-brief-section">
+              <div class="plan-section-top">
+                <div><h4>${t.emergency}</h4></div>
+              </div>
+              <ul>
+                ${(plan.emergency_contacts && plan.emergency_contacts.length
+                  ? plan.emergency_contacts.map((contact) => `${contact.name}: ${contact.phone}`)
+                  : ["County Health Office: 0800-720-720"]).map((item) => `<li>${item}</li>`).join("")}
+              </ul>
+            </section>
+          </div>
+        `;
+
+        renderHazardSections(currentPlanFilter);
+      }
+
+      function renderHazardSections(filter) {
+        currentPlanFilter = filter;
+        document.querySelectorAll(".plan-tab").forEach((button) => {
+          button.classList.toggle("active", button.dataset.filter === filter);
+        });
+
+        if (!currentActionPlan || !currentActionPlan.hazard_sections) {
+          hazardPlanGrid.innerHTML = "";
+          return;
+        }
+
+        const t = translations[currentLanguage];
+        const filteredSections = currentActionPlan.hazard_sections.filter((section) => {
+          if (filter === "all") {
+            return true;
+          }
+          return section.category === filter;
+        });
+
+        if (!filteredSections.length) {
+          hazardPlanGrid.innerHTML = `<div class="hazard-empty">${t.no_tab_items}</div>`;
+          return;
+        }
+
+        hazardPlanGrid.innerHTML = filteredSections.map((section) => `
+          <article class="hazard-plan-card">
+            <div class="hazard-plan-top">
+              <div>
+                <h4>${section.label}</h4>
+                <div class="hazard-plan-meta">${section.category_label}</div>
+              </div>
+              <span class="risk-chip ${section.risk_level}">${section.risk_label}</span>
+            </div>
+            <div class="confidence-label">
+              <span>${t.probability}</span>
+              <strong>${section.confidence}%</strong>
+            </div>
+            <div>
+              <strong>${t.action_items}</strong>
+            </div>
+            <ul>
+              ${(section.actions || []).map((item) => `<li>${item}</li>`).join("")}
+            </ul>
+          </article>
+        `).join("");
+      }
+
+      function setLanguage(lang) {
+        currentLanguage = lang;
+        document.querySelectorAll(".lang-btn").forEach((button) => {
+          button.classList.toggle("active", button.dataset.lang === lang);
+        });
+
+        if (currentPredictions) {
+          displayResults(currentPredictions);
+          generateActionPlan(currentPredictions);
+        }
+      }
+
+      function getRiskTableRows() {
+        const diseaseNames = ["malaria", "cholera", "dengue", "floods", "drought"];
+        return diseaseNames
+          .filter((name) => currentPredictions && currentPredictions[name])
+          .map((name) => {
+            const risk = currentPredictions[name].risk;
+            return [
+              name.charAt(0).toUpperCase() + name.slice(1),
+              translations[currentLanguage].risk[risk] || risk,
+              `${currentPredictions[name].confidence}%`,
+              (currentPredictions[name].drivers || []).join(", "),
+            ];
+          });
+      }
+
+      function arrayBufferToBase64(buffer) {
+        const bytes = new Uint8Array(buffer);
+        const chunkSize = 0x8000;
+        let binary = "";
+
+        for (let i = 0; i < bytes.length; i += chunkSize) {
+          const chunk = bytes.subarray(i, i + chunkSize);
+          binary += String.fromCharCode.apply(null, chunk);
+        }
+
+        return window.btoa(binary);
+      }
+
+      async function registerGaramondFont(doc) {
+        if (!garamondFontData) {
+          const response = await fetch(garamondFontUrl);
+          if (!response.ok) {
+            throw new Error("Unable to load Garamond font");
+          }
+          garamondFontData = arrayBufferToBase64(await response.arrayBuffer());
+        }
+
+        doc.addFileToVFS("EBGaramond.ttf", garamondFontData);
+        doc.addFont("EBGaramond.ttf", "EBGaramond", "normal");
+        doc.addFont("EBGaramond.ttf", "EBGaramond", "bold");
+      }
+
+      function decoratePdfPage(doc, reportMeta, pageNumber) {
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+
+        doc.setFillColor(236, 246, 255);
+        doc.rect(0, 0, pageWidth, pageHeight, "F");
+
+        doc.setFillColor(12, 48, 96);
+        doc.rect(0, 0, pageWidth, 84, "F");
+        doc.setFillColor(147, 211, 245);
+        doc.rect(0, 84, pageWidth, 4, "F");
+
+        doc.setTextColor(255, 255, 255);
+        doc.setFont("EBGaramond", "bold");
+        doc.setFontSize(21);
+        doc.text("FutureGuard Report", 40, 38);
+        doc.setFont("EBGaramond", "normal");
+        doc.setFontSize(10);
+        doc.text("Climate-informed community risk and response report", 40, 58);
+
+        doc.setDrawColor(183, 218, 246);
+        doc.setFillColor(249, 252, 255);
+        doc.roundedRect(40, 106, pageWidth - 80, 56, 14, 14, "FD");
+
+        doc.setTextColor(12, 48, 96);
+        doc.setFont("EBGaramond", "bold");
+        doc.setFontSize(10);
+        doc.text("Climate Region", 54, 126);
+        doc.text("Reference County", 220, 126);
+        doc.text("Generated", 384, 126);
+        doc.setFont("EBGaramond", "normal");
+        doc.setFontSize(11);
+        doc.text(String(reportMeta.region), 54, 144);
+        doc.text(String(reportMeta.county), 220, 144);
+        doc.text(String(reportMeta.generatedAt), 384, 144);
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.setTextColor(79, 111, 146);
+        doc.text(`Page ${pageNumber}`, pageWidth - 72, pageHeight - 24);
+      }
+
+      function appendPdfSectionCard(doc, title, items, startY, reportMeta) {
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const contentWidth = pageWidth - 108;
+        const preparedItems = (items.length ? items : ["No current entries"])
+          .map((item) => doc.splitTextToSize(`- ${item}`, contentWidth));
+        const sectionHeight = preparedItems.reduce(
+          (total, lines) => total + (lines.length * 13) + 5,
+          38,
+        ) + 18;
+
+        let y = startY;
+        if (y + sectionHeight > pageHeight - 40) {
+          doc.addPage();
+          decoratePdfPage(doc, reportMeta, doc.getNumberOfPages());
+          y = 182;
+        }
+
+        doc.setDrawColor(183, 218, 246);
+        doc.setFillColor(249, 252, 255);
+        doc.roundedRect(40, y, pageWidth - 80, sectionHeight, 14, 14, "FD");
+        doc.setTextColor(12, 48, 96);
+        doc.setFont("EBGaramond", "bold");
+        doc.setFontSize(12);
+        doc.text(title, 54, y + 24);
+
+        doc.setFont("EBGaramond", "normal");
+        doc.setFontSize(10.5);
+        let cursorY = y + 44;
+        preparedItems.forEach((lines) => {
+          doc.text(lines, 56, cursorY);
+          cursorY += (lines.length * 13) + 5;
+        });
+
+        return y + sectionHeight + 14;
+      }
+
+      function appendPdfBottomSectionCard(doc, title, items, startY, reportMeta) {
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const contentWidth = pageWidth - 108;
+        const preparedItems = (items.length ? items : ["No current entries"])
+          .map((item) => doc.splitTextToSize(`- ${item}`, contentWidth));
+        const sectionHeight = preparedItems.reduce(
+          (total, lines) => total + (lines.length * 13) + 5,
+          38,
+        ) + 18;
+
+        const bottomY = pageHeight - sectionHeight - 44;
+
+        if (sectionHeight > pageHeight - 220 || startY > bottomY) {
+          doc.addPage();
+          decoratePdfPage(doc, reportMeta, doc.getNumberOfPages());
+          return appendPdfSectionCard(doc, title, items, pageHeight - sectionHeight - 44, reportMeta);
+        }
+
+        return appendPdfSectionCard(doc, title, items, bottomY, reportMeta);
+      }
+
+      async function downloadReport() {
+        if (!currentPredictions || !currentActionPlan) {
+          alert(translations[currentLanguage].report_first);
+          return;
+        }
+
+        if (!window.jspdf || !window.jspdf.jsPDF || typeof window.jspdf.jsPDF !== "function") {
+          alert(translations[currentLanguage].pdf_unavailable);
+          return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ unit: "pt", format: "a4" });
+        const region = currentPredictions.climate_region || currentRegion;
+        const county = currentPredictions.county || "Representative county";
+        const t = translations[currentLanguage];
+        const riskRows = getRiskTableRows();
+        const reportMeta = {
+          region,
+          county,
+          generatedAt: new Date().toLocaleString(),
+        };
+
+        try {
+          await registerGaramondFont(doc);
+        } catch (error) {
+          console.error(error);
+          alert(translations[currentLanguage].pdf_unavailable);
+          return;
+        }
+
+        decoratePdfPage(doc, reportMeta, 1);
+
+        doc.autoTable({
+          startY: 184,
+          head: [["Condition", "Risk level", "Confidence", "Key drivers"]],
+          body: riskRows,
+          theme: "grid",
+          styles: {
+            font: "EBGaramond",
+            fontSize: 10,
+            cellPadding: 8,
+            lineColor: [183, 218, 246],
+            lineWidth: 0.6,
+            textColor: [18, 53, 94],
+          },
+          headStyles: {
+            fillColor: [16, 59, 114],
+            textColor: [255, 255, 255],
+            fontStyle: "bold",
+            font: "EBGaramond",
+          },
+          bodyStyles: {
+            fillColor: [249, 252, 255],
+          },
+          alternateRowStyles: {
+            fillColor: [237, 247, 255],
+          },
+          margin: { left: 40, right: 40 },
+          willDrawPage: (data) => {
+            decoratePdfPage(doc, reportMeta, data.pageNumber);
+          },
+        });
+
+        let cursorY = doc.lastAutoTable.finalY + 24;
+        doc.setTextColor(12, 48, 96);
+        doc.setFont("EBGaramond", "bold");
+        doc.setFontSize(13);
+        doc.text(t.response_brief_title, 40, cursorY);
+        cursorY += 18;
+        cursorY = appendPdfSectionCard(doc, t.immediate, currentActionPlan.immediate_actions || [], cursorY, reportMeta);
+        cursorY = appendPdfSectionCard(doc, t.weekly, currentActionPlan.weekly_actions || [], cursorY, reportMeta);
+        cursorY = appendPdfSectionCard(doc, t.ongoing, currentActionPlan.ongoing_actions || [], cursorY, reportMeta);
+
+        const hazardSections = currentActionPlan.hazard_sections || [];
+        if (hazardSections.length) {
+          doc.addPage();
+          decoratePdfPage(doc, reportMeta, doc.getNumberOfPages());
+
+          const hazardRows = hazardSections.map((section) => [
+            section.label,
+            section.category_label,
+            section.risk_label,
+            `${section.confidence}%`,
+            (section.actions || []).join("\n"),
+          ]);
+
+          doc.setTextColor(12, 48, 96);
+          doc.setFont("EBGaramond", "bold");
+          doc.setFontSize(13);
+          doc.text("Hazard-specific response matrix", 40, 184);
+
+          doc.autoTable({
+            startY: 198,
+            head: [["Hazard", "Class", "Risk", "Confidence", "Guidance notes"]],
+            body: hazardRows,
+            theme: "grid",
+            styles: {
+              font: "EBGaramond",
+              fontSize: 9.4,
+              cellPadding: 7,
+              lineColor: [183, 218, 246],
+              lineWidth: 0.6,
+              textColor: [18, 53, 94],
+              valign: "top",
+            },
+            headStyles: {
+              fillColor: [16, 59, 114],
+              textColor: [255, 255, 255],
+              fontStyle: "bold",
+              font: "EBGaramond",
+            },
+            bodyStyles: {
+              fillColor: [249, 252, 255],
+            },
+            alternateRowStyles: {
+              fillColor: [237, 247, 255],
+            },
+            margin: { left: 40, right: 40 },
+            willDrawPage: (data) => {
+              decoratePdfPage(doc, reportMeta, data.pageNumber);
+              doc.setTextColor(12, 48, 96);
+              doc.setFont("EBGaramond", "bold");
+              doc.setFontSize(13);
+              doc.text("Hazard-specific response matrix", 40, 184);
+            },
+          });
+
+          cursorY = doc.lastAutoTable.finalY + 18;
+        }
+
+        appendPdfBottomSectionCard(
+          doc,
+          t.emergency,
+          (currentActionPlan.emergency_contacts || []).map((contact) => `${contact.name}: ${contact.phone}`),
+          cursorY,
+          reportMeta,
+        );
+
+        doc.save(`futureguard_${region.toLowerCase().replace(/[^a-z0-9]+/g, "_")}_report.pdf`);
+      }
+
+      function shareReport() {
+        if (!currentPredictions || !currentActionPlan) {
+          alert(translations[currentLanguage].report_first);
+          return;
+        }
+
+        const region = currentPredictions.climate_region || currentRegion;
+        const summary = `${translations[currentLanguage].share_summary} ${region}: review the latest regional prediction and action plan.`;
+
+        if (navigator.share) {
+          navigator.share({
+            title: "FutureGuard Prediction Summary",
+            text: summary,
+            url: window.location.href,
+          }).catch(console.error);
+          return;
+        }
+
+        navigator.clipboard.writeText(summary).then(() => {
+          alert(translations[currentLanguage].share_copied);
+        });
+      }
+
+      downloadBtn.addEventListener("click", downloadReport);
+      shareBtn.addEventListener("click", shareReport);
+      document.querySelectorAll(".lang-btn").forEach((button) => {
+        button.addEventListener("click", () => setLanguage(button.dataset.lang));
+      });
+      document.querySelectorAll(".plan-tab").forEach((button) => {
+        button.addEventListener("click", () => renderHazardSections(button.dataset.filter));
+      });
+
+      updateSearchState(null);
+      runPrediction(getRequestedRegion());
+    });
+  </script>
+{% endblock %}

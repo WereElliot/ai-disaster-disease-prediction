@@ -1,0 +1,36 @@
+<aside class="side-nav">
+  <div class="side-nav-inner">
+    <div class="side-label">Public Pages</div>
+    <nav class="side-links" aria-label="Sidebar navigation">
+      <a
+        class="side-link {% if active_page == 'home' %}active{% endif %}"
+        href="{% url 'community_dashboard:dashboard' %}"
+        title="Home"
+      >
+        <i class="bi bi-house-door"></i>
+        <span class="side-link-text">Home</span>
+      </a>
+      <a
+        class="side-link {% if active_page == 'predictions' %}active{% endif %}"
+        href="{% url 'community_dashboard:predictions' %}"
+        title="Predictions"
+      >
+        <i class="bi bi-activity"></i>
+        <span class="side-link-text">Predictions</span>
+      </a>
+      <a
+        class="side-link {% if active_page == 'emergency' %}active{% endif %}"
+        href="{% url 'community_dashboard:emergency_report' %}"
+        title="Emergency Report"
+      >
+        <i class="bi bi-megaphone"></i>
+        <span class="side-link-text">Emergency Report</span>
+      </a>
+    </nav>
+
+    <div class="side-note">
+      Search for a climatic region from the top bar, then use the sidebar to
+      move between pages.
+    </div>
+  </div>
+</aside>

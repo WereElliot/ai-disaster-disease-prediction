@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FutureGuard Admin Dashboard</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+:root {
+  --bg-dark:#0a0e1a; --bg-panel:#111827; --bg-card:#161d2e; --bg-card-hover:#1c2540;
+  --accent-teal:#00e5c3; --accent-amber:#f5a623; --accent-red:#ff4d6d;
+  --accent-blue:#4da6ff; --accent-green:#3ddc84; --accent-purple:#a78bfa;
+  --text-primary:#e8ecf4; --text-muted:#6b7a99; --text-dim:#3d4a66;
+  --border:rgba(255,255,255,0.06); --sidebar-width:240px;
+  --font-main:'Sora',sans-serif; --font-mono:'DM Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-main);background:var(--bg-dark);color:var(--text-primary);min-height:100vh;display:flex;overflow-x:hidden}
+.sidebar{width:var(--sidebar-width);background:var(--bg-panel);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100}
+.sidebar-logo{padding:1.5rem 1.25rem 1rem;border-bottom:1px solid var(--border)}
+.logo-mark{display:flex;align-items:center;gap:10px}
+.logo-icon{width:34px;height:34px;background:var(--accent-teal);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.logo-icon i{font-size:16px;color:#0a0e1a}
+.logo-text{font-size:14px;font-weight:600;letter-spacing:.04em}
+.logo-sub{font-size:10px;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
+.nav-section{padding:1rem 0;flex:1;overflow-y:auto}
+.nav-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);padding:.5rem 1.25rem .25rem;font-weight:500}
+.nav-item{display:flex;align-items:center;gap:10px;padding:.55rem 1.25rem;color:var(--text-muted);font-size:13px;font-weight:400;text-decoration:none;border-left:2px solid transparent;transition:all .15s;cursor:pointer}
+.nav-item:hover{color:var(--text-primary);background:rgba(255,255,255,.03)}
+.nav-item.active{color:var(--accent-teal);border-left-color:var(--accent-teal);background:rgba(0,229,195,.06)}
+.nav-item i{font-size:15px;width:18px;text-align:center}
+.nav-badge{margin-left:auto;background:rgba(255,77,109,.15);color:var(--accent-red);font-size:10px;font-family:var(--font-mono);padding:1px 6px;border-radius:10px}
+.sidebar-footer{padding:1rem 1.25rem;border-top:1px solid var(--border)}
+.user-chip{display:flex;align-items:center;gap:10px}
+.user-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#00e5c3,#4da6ff);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#0a0e1a;flex-shrink:0}
+.user-name{font-size:12px;font-weight:500}
+.user-role{font-size:10px;color:var(--text-muted)}
+
+/* Thin text for better readability */
+.stat-card, .stat-card * , .panel, .panel * , .data-table, .data-table * {
+  font-weight: 300;
+}
+
+/* Light mode */
+body.light-mode {
+  --bg-dark: #f7f9ff;
+  --bg-panel: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f3f6ff;
+  --text-primary: #0a0e1a;
+  --text-muted: #5f6d8c;
+  --text-dim: #7b8aac;
+  --border: rgba(15,23,42,0.08);
+}
+
+body.light-mode .sidebar {background: var(--bg-panel);border-right-color: rgba(15,23,42,0.08)}
+body.light-mode .topbar {background: var(--bg-panel);border-bottom-color: rgba(15,23,42,0.08)}
+body.light-mode .btn-icon {background: rgba(15,23,42,0.05);border-color: rgba(15,23,42,0.08)}
+body.light-mode .btn-icon:hover {background: rgba(15,23,42,0.1)}
+body.light-mode .stat-card {background: var(--bg-card);border-color: var(--border)}
+body.light-mode .panel {background: var(--bg-card);border-color: var(--border)}
+
+.main{margin-left:var(--sidebar-width);flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:var(--bg-panel);border-bottom:1px solid var(--border);padding:0 1.75rem;height:60px;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:50}
+.topbar-title{font-size:15px;font-weight:500;flex:1}
+.topbar-sub{font-size:12px;color:var(--text-muted);display:block;font-weight:300}
+.topbar-actions{display:flex;align-items:center;gap:12px}
+.btn-icon{width:34px;height:34px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);cursor:pointer;transition:all .15s;font-size:15px;text-decoration:none;position:relative}
+.btn-icon:hover{background:rgba(255,255,255,.08);color:var(--text-primary)}
+.alert-dot::after{content:'';width:7px;height:7px;background:var(--accent-red);border-radius:50%;position:absolute;top:4px;right:4px;border:1.5px solid var(--bg-panel)}
+.content{padding:1.5rem 1.75rem;flex:1}
+.page{display:none}.page.active{display:block}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:1.5rem}
+.stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.25rem;position:relative;overflow:hidden;transition:background .2s}
+.stat-card:hover{background:var(--bg-card-hover)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.stat-card.c-teal::before{background:var(--accent-teal)}
+.stat-card.c-amber::before{background:var(--accent-amber)}
+.stat-card.c-red::before{background:var(--accent-red)}
+.stat-card.c-blue::before{background:var(--accent-blue)}
+.stat-card.c-green::before{background:var(--accent-green)}
+.stat-card.c-purple::before{background:var(--accent-purple)}
+.stat-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:.9rem}
+.stat-card.c-teal .stat-icon{background:rgba(0,229,195,.12);color:var(--accent-teal)}
+.stat-card.c-amber .stat-icon{background:rgba(245,166,35,.12);color:var(--accent-amber)}
+.stat-card.c-red .stat-icon{background:rgba(255,77,109,.12);color:var(--accent-red)}
+.stat-card.c-blue .stat-icon{background:rgba(77,166,255,.12);color:var(--accent-blue)}
+.stat-card.c-green .stat-icon{background:rgba(61,220,132,.12);color:var(--accent-green)}
+.stat-card.c-purple .stat-icon{background:rgba(167,139,250,.12);color:var(--accent-purple)}
+.stat-value{font-size:26px;font-weight:600;font-family:var(--font-mono);line-height:1;margin-bottom:4px}
+.stat-label{font-size:11px;color:var(--text-muted);letter-spacing:.04em;text-transform:uppercase}
+.stat-delta{position:absolute;top:1rem;right:1rem;font-size:11px;font-family:var(--font-mono);padding:2px 7px;border-radius:20px}
+.delta-up{background:rgba(61,220,132,.12);color:var(--accent-green)}
+.delta-down{background:rgba(255,77,109,.12);color:var(--accent-red)}
+.grid-2-1{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:1.5rem}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:1.5rem}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:1.5rem}
+.panel{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:0}
+.panel-header{padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.panel-title{font-size:13px;font-weight:500;letter-spacing:.02em}
+.panel-meta{font-size:11px;color:var(--text-muted)}
+.panel-body{padding:1.25rem}
+.chart-wrap{position:relative;width:100%}
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);font-weight:500;padding:.5rem .75rem .75rem;text-align:left;border-bottom:1px solid var(--border)}
+.data-table td{padding:.65rem .75rem;font-size:12.5px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:rgba(255,255,255,.02)}
+.risk-pill{display:inline-block;font-size:10px;font-family:var(--font-mono);padding:2px 8px;border-radius:20px;font-weight:500}
+.risk-critical{background:rgba(255,77,109,.15);color:#ff6b84}
+.risk-high{background:rgba(245,166,35,.15);color:#f5b849}
+.risk-moderate{background:rgba(77,166,255,.15);color:#6db8ff}
+.risk-low{background:rgba(61,220,132,.15);color:#5de8a0}
+.risk-none{background:rgba(255,255,255,.06);color:var(--text-muted)}
+.badge-pill{display:inline-block;font-size:10px;font-family:var(--font-mono);padding:2px 8px;border-radius:20px}
+.badge-teal{background:rgba(0,229,195,.12);color:var(--accent-teal)}
+.badge-blue{background:rgba(77,166,255,.12);color:var(--accent-blue)}
+.badge-amber{background:rgba(245,166,35,.12);color:var(--accent-amber)}
+.badge-red{background:rgba(255,77,109,.12);color:var(--accent-red)}
+.badge-green{background:rgba(61,220,132,.12);color:var(--accent-green)}
+.badge-purple{background:rgba(167,139,250,.12);color:var(--accent-purple)}
+.timeline-item{display:flex;gap:12px;padding:.65rem 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.timeline-item:last-child{border-bottom:none}
+.tl-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.tl-text{font-size:12px;line-height:1.5;flex:1}
+.tl-time{font-size:10px;font-family:var(--font-mono);color:var(--text-dim)}
+.model-row{display:flex;align-items:center;gap:10px;padding:.6rem 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.model-row:last-child{border-bottom:none}
+.model-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot-green{background:var(--accent-green);box-shadow:0 0 6px rgba(61,220,132,.5)}
+.dot-amber{background:var(--accent-amber)}
+.dot-red{background:var(--accent-red)}
+.model-name{font-size:12.5px;flex:1}
+.model-acc{font-size:12px;font-family:var(--font-mono);color:var(--text-muted);margin-right:8px}
+.model-bar-wrap{width:70px;height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden}
+.model-bar{height:100%;border-radius:2px}
+.form-control-dark{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-size:13px;padding:.5rem .85rem;font-family:var(--font-main);width:100%;outline:none;transition:border .15s}
+.form-control-dark:focus{border-color:rgba(0,229,195,.4);background:rgba(0,229,195,.04)}
+.form-control-dark option{background:var(--bg-card);color:var(--text-primary)}
+.btn-primary-ai{background:var(--accent-teal);color:#0a0e1a;border:none;border-radius:8px;padding:.55rem 1.25rem;font-size:13px;font-weight:600;font-family:var(--font-main);cursor:pointer;transition:opacity .15s}
+.btn-primary-ai:hover{opacity:.85}
+.btn-ghost{background:rgba(255,255,255,.05);color:var(--text-muted);border:1px solid var(--border);border-radius:8px;padding:.5rem 1rem;font-size:13px;font-family:var(--font-main);cursor:pointer;transition:all .15s}
+.btn-ghost:hover{background:rgba(255,255,255,.09);color:var(--text-primary)}
+.btn-ghost.active{background:rgba(0,229,195,.12);border-color:rgba(0,229,195,.2);color:var(--text-primary)}
+.progress-bar-bg{height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;margin-top:6px}
+.progress-bar-fill{height:100%;border-radius:3px;transition:width 1s ease}
+.section-heading{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);font-weight:500;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.03);font-size:12.5px}
+.info-row:last-child{border-bottom:none}
+.info-label{color:var(--text-muted)}
+.info-val{font-family:var(--font-mono);font-size:12px}
+.xai-bar-row{display:flex;align-items:center;gap:10px;padding:.5rem 0}
+.xai-feat{font-size:12px;width:140px;flex-shrink:0;color:var(--text-muted)}
+.xai-bar-wrap{flex:1;height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden}
+.xai-bar-fill{height:100%;border-radius:4px}
+.xai-val{font-size:11px;font-family:var(--font-mono);width:40px;text-align:right;flex-shrink:0}
+.log-line{font-size:11.5px;font-family:var(--font-mono);padding:.35rem .75rem;border-bottom:1px solid rgba(255,255,255,.025);display:flex;gap:12px}
+.log-time{color:var(--text-dim);flex-shrink:0;width:90px}
+.log-level-info{color:var(--accent-blue)}
+.log-level-warn{color:var(--accent-amber)}
+.log-level-error{color:var(--accent-red)}
+.log-level-ok{color:var(--accent-green)}
+.metric-mini{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;text-align:center}
+.metric-mini-val{font-size:20px;font-weight:600;font-family:var(--font-mono)}
+.metric-mini-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-top:3px}
+@media(max-width:1100px){.stat-grid{grid-template-columns:repeat(2,1fr)}.grid-2-1{grid-template-columns:1fr}.grid-3{grid-template-columns:1fr 1fr}}
+@media(max-width:768px){.sidebar{display:none}.main{margin-left:0}.stat-grid{grid-template-columns:repeat(2,1fr)}.grid-3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <div class="logo-icon"><i class="bi bi-layers-half"></i></div>
+      <div>
+        <div class="logo-text">FutureGuard</div>
+        <div class="logo-sub">Outbreak Platform</div>
+      </div>
+    </div>
+  </div>
+  <nav class="nav-section">
+    <div class="nav-label">Overview</div>
+    <a class="nav-item" data-page="dashboard"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
+    <a class="nav-item" data-page="predictions"><i class="bi bi-activity"></i> Live Predictions <span class="nav-badge">3</span></a>
+    <a class="nav-item" data-page="riskmap"><i class="bi bi-map"></i> Risk Map</a>
+    <a class="nav-item" data-page="emergencies"><i class="bi bi-megaphone"></i> Community Emergencies <span class="nav-badge">{{ community_alert_count }}</span></a>
+    <div class="nav-label">Data</div>
+    <a class="nav-item" data-page="ingestion"><i class="bi bi-cloud-download"></i> Data Ingestion</a>
+    <a class="nav-item" data-page="climate"><i class="bi bi-thermometer-half"></i> Climate Data</a>
+    <a class="nav-item" data-page="health"><i class="bi bi-hospital"></i> Health Records</a>
+    <a class="nav-item" data-page="disasters"><i class="bi bi-lightning"></i> Disaster Events</a>
+    <div class="nav-label">Models</div>
+    <a class="nav-item" data-page="lstm"><i class="bi bi-cpu"></i> LSTM Model</a>
+    <a class="nav-item" data-page="xgboost"><i class="bi bi-diagram-3"></i> XGBoost Model</a>
+    <a class="nav-item" data-page="hybrid"><i class="bi bi-intersect"></i> Hybrid Ensemble</a>
+    <a class="nav-item" data-page="xai"><i class="bi bi-eye"></i> XAI / Explainability</a>
+    <div class="nav-label">Reports</div>
+    <a class="nav-item" data-page="evaluation"><i class="bi bi-bar-chart-line"></i> Evaluation</a>
+    <a class="nav-item" data-page="export"><i class="bi bi-file-earmark-text"></i> Export Report</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-chip">
+      <div class="user-avatar">LA</div>
+      <div><div class="user-name">Los Angeles</div><div class="user-role">Admin · Researcher</div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<div class="main">
+  <header class="topbar">
+    <div>
+      <div class="topbar-title" id="page-title">System Dashboard</div>
+      <span class="topbar-sub" id="page-sub">{{ dashboard_subtitle }}</span>
+    </div>
+    <div class="topbar-actions">
+      <div class="btn-icon alert-dot" title="Alerts"><i class="bi bi-bell"></i></div>
+      <div class="btn-icon" id="themeToggle" title="Toggle theme" onclick="toggleTheme()"><i class="bi bi-moon-fill"></i></div>
+      <div class="btn-icon" title="Refresh" onclick="location.reload()"><i class="bi bi-arrow-clockwise"></i></div>
+    </div>
+  </header>
+  <main class="content">
+
+<!-- ════════════════════════════════════════
+     PAGE: DASHBOARD
+════════════════════════════════════════ -->
+<div class="page active" id="page-dashboard">
+  <div class="stat-grid">
+    <div class="stat-card c-teal" title="Model F1-Score on disease prediction task"><div class="stat-icon"><i class="bi bi-bug"></i></div><div class="stat-delta delta-up">↑ 4.2%</div><div class="stat-value">{{ disease_predictions }}%</div><div class="stat-label">Model F1-Score</div></div>
+    <div class="stat-card c-amber" title="Model accuracy on disaster forecast task"><div class="stat-icon"><i class="bi bi-lightning-charge"></i></div><div class="stat-delta delta-down">↓ 1.1%</div><div class="stat-value">{{ disaster_forecasts }}%</div><div class="stat-label">Model Accuracy</div></div>
+    <div class="stat-card c-red" title="Number of active threat alerts"><div class="stat-icon"><i class="bi bi-exclamation-triangle"></i></div><div class="stat-delta delta-down">↑ 2</div><div class="stat-value">{{ active_alerts }}</div><div class="stat-label">Active Alerts</div></div>
+    <div class="stat-card c-blue" title="Total training samples across all data sources"><div class="stat-icon"><i class="bi bi-database"></i></div><div class="stat-delta delta-up">↑ 1.2k</div><div class="stat-value">{{ training_samples }}</div><div class="stat-label">Training Samples</div></div>
+  </div>
+  <div class="grid-2-1">
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Regional Risk Signal Over Time</span>
+        <div style="display:flex;gap:14px">
+          <span style="font-size:11px;color:var(--accent-teal);display:flex;align-items:center;gap:5px"><span style="width:10px;height:3px;background:var(--accent-teal);display:inline-block;border-radius:2px"></span>Malaria</span>
+          <span style="font-size:11px;color:var(--accent-amber);display:flex;align-items:center;gap:5px"><span style="width:10px;height:3px;background:var(--accent-amber);display:inline-block;border-radius:2px"></span>Cholera</span>
+          <span style="font-size:11px;color:var(--accent-red);display:flex;align-items:center;gap:5px"><span style="width:10px;height:3px;background:var(--accent-red);display:inline-block;border-radius:2px"></span>Floods</span>
+        </div>
+      </div>
+      <div class="panel-body"><div class="chart-wrap" style="height:220px"><canvas id="dashTrendChart"></canvas></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Model Performance</span><span class="panel-meta">F1 target ≥ 0.85</span></div>
+      <div class="panel-body">
+        <div class="chart-wrap" style="height:160px;margin-bottom:1rem"><canvas id="dashRadarChart"></canvas></div>
+        <div class="model-row"><div class="model-dot dot-green"></div><div class="model-name">LSTM</div><div class="model-acc">{{ models.0.acc }}</div><div class="model-bar-wrap"><div class="model-bar" style="width:{{ models.0.width }};background:var(--accent-teal)"></div></div></div>
+        <div class="model-row"><div class="model-dot dot-green"></div><div class="model-name">XGBoost</div><div class="model-acc">{{ models.1.acc }}</div><div class="model-bar-wrap"><div class="model-bar" style="width:{{ models.1.width }};background:var(--accent-blue)"></div></div></div>
+        <div class="model-row"><div class="model-dot dot-amber"></div><div class="model-name">Hybrid</div><div class="model-acc">{{ models.2.acc }}</div><div class="model-bar-wrap"><div class="model-bar" style="width:{{ models.2.width }};background:var(--accent-amber)"></div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="grid-3" style="margin-bottom:1.5rem">
+    <div class="panel" style="grid-column:span 2">
+      <div class="panel-header"><span class="panel-title">Active Risk Alerts</span><span class="panel-meta">{{ active_alerts }} active · sorted by severity</span></div>
+      <div class="panel-body" style="padding:0">
+        <table class="data-table">
+          <thead><tr><th>Region</th><th>Threat</th><th>Confidence</th><th>Risk</th><th>Source</th><th>Triggered</th></tr></thead>
+          <tbody>
+            {% for alert in alerts %}
+            <tr><td>{{ alert.region }}</td><td><i class="bi bi-bug" style="color:var(--accent-red);font-size:12px"></i> {{ alert.threat }}</td><td style="font-family:var(--font-mono);font-size:12px">{{ alert.confidence }}%</td><td><span class="risk-pill risk-{{ alert.risk|lower }}">{{ alert.risk }}</span></td><td style="color:var(--text-muted);font-size:12px">{{ alert.source }}</td><td style="color:var(--text-muted);font-size:12px">{{ alert.time }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Pipeline Activity</span></div>
+      <div class="panel-body">
+        <div class="timeline-item"><div class="tl-dot" style="background:var(--accent-teal)"></div><div><div class="tl-text">Climate data ingested from NASA POWER</div><div class="tl-time">2 min ago</div></div></div>
+        <div class="timeline-item"><div class="tl-dot" style="background:var(--accent-blue)"></div><div><div class="tl-text">LSTM retrained · F1: 0.891</div><div class="tl-time">18 min ago</div></div></div>
+        <div class="timeline-item"><div class="tl-dot" style="background:var(--accent-amber)"></div><div><div class="tl-text">WHO GHO sync — 142 records</div><div class="tl-time">1h ago</div></div></div>
+        <div class="timeline-item"><div class="tl-dot" style="background:var(--accent-red)"></div><div><div class="tl-text">Critical alert — Nairobi malaria</div><div class="tl-time">2h ago</div></div></div>
+        <div class="timeline-item"><div class="tl-dot" style="background:var(--accent-green)"></div><div><div class="tl-text">XGBoost grid search done · 5-fold CV</div><div class="tl-time">4h ago</div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="grid-2" style="margin-bottom:1.5rem">
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Community Emergency Reports</span><span class="panel-meta">{{ community_alert_count }} open reports from public users</span></div>
+      {% if recent_emergency_reports %}
+      <div class="panel-body" style="padding:0">
+        <table class="data-table">
+          <thead><tr><th>County</th><th>Type</th><th>Severity</th><th>Status</th><th>Reported By</th><th>Submitted</th></tr></thead>
+          <tbody>
+            {% for report in recent_emergency_reports %}
+            <tr>
+              <td>
+                <div>{{ report.county }}</div>
+                {% if report.location_detail %}
+                <div style="font-size:11px;color:var(--text-muted)">{{ report.location_detail }}</div>
+                {% endif %}
+              </td>
+              <td>
+                <div>{{ report.get_emergency_type_display }}</div>
+                <div style="font-size:11px;color:var(--text-muted);max-width:240px">{{ report.description|truncatechars:72 }}</div>
+              </td>
+              <td><span class="risk-pill risk-{{ report.severity_css }}">{{ report.get_severity_display }}</span></td>
+              <td><span class="badge-pill badge-{{ report.status_badge_css }}">{{ report.get_status_display }}</span></td>
+              <td>
+                <div>{{ report.reporter_display }}</div>
+                {% if report.reporter_phone %}
+                <div style="font-size:11px;color:var(--text-muted)">{{ report.reporter_phone }}</div>
+                {% endif %}
+              </td>
+              <td style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">{{ report.created_at_display }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="panel-body">
+        <div style="font-size:12.5px;color:var(--text-muted)">No community emergency reports have been submitted yet.</div>
+      </div>
+      {% endif %}
+    </div>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Emergency Queue Snapshot</span></div>
+      <div class="panel-body">
+        <div class="info-row"><span class="info-label">New reports</span><span class="info-val">{{ community_emergency_new }}</span></div>
+        <div class="info-row"><span class="info-label">Under review</span><span class="info-val">{{ community_emergency_in_progress }}</span></div>
+        <div class="info-row"><span class="info-label">Critical open reports</span><span class="info-val" style="color:var(--accent-red)">{{ community_emergency_critical }}</span></div>
+        <div class="info-row"><span class="info-label">Resolved reports</span><span class="info-val" style="color:var(--accent-green)">{{ community_emergency_resolved }}</span></div>
+        <div class="section-heading" style="margin-top:1.25rem">Admin Response Flow</div>
+        <div class="timeline-item"><div class="tl-dot" style="background:var(--accent-red)"></div><div><div class="tl-text">New alerts arrive from the public emergency-report page.</div><div class="tl-time">Step 1</div></div></div>
+        <div class="timeline-item"><div class="tl-dot" style="background:var(--accent-amber)"></div><div><div class="tl-text">Acknowledge urgent cases and move them into active follow-up.</div><div class="tl-time">Step 2</div></div></div>
+        <div class="timeline-item"><div class="tl-dot" style="background:var(--accent-blue)"></div><div><div class="tl-text">Use the Community Emergencies page to manage status changes.</div><div class="tl-time">Step 3</div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-header"><span class="panel-title">Current Climate Snapshot - Kenya Climate Regions</span><span class="panel-meta">NASA POWER fixture averages · {{ data_latest_date }}</span></div>
+    <div class="panel-body">
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:14px;text-align:center">
+        <div><div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">Temp (T2M)</div><div style="font-size:22px;font-weight:600;font-family:var(--font-mono);color:var(--accent-amber)">{{ temp }}°</div></div>
+        <div><div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">Precipitation</div><div style="font-size:22px;font-weight:600;font-family:var(--font-mono);color:var(--accent-blue)">{{ precip }}<span style="font-size:13px">mm</span></div></div>
+        <div><div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">Humidity (RH2M)</div><div style="font-size:22px;font-weight:600;font-family:var(--font-mono);color:var(--accent-teal)">{{ humidity }}<span style="font-size:13px">%</span></div></div>
+        <div><div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">Wind (WS2M)</div><div style="font-size:22px;font-weight:600;font-family:var(--font-mono);color:var(--text-primary)">{{ wind }}<span style="font-size:13px">m/s</span></div></div>
+        <div><div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">RMSE</div><div style="font-size:22px;font-weight:600;font-family:var(--font-mono);color:var(--accent-green)">{{ rmse }}</div></div>
+        <div><div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">ROC-AUC</div><div style="font-size:22px;font-weight:600;font-family:var(--font-mono);color:var(--accent-teal)">{{ roc_auc }}</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-header"><span class="panel-title">Recent Forecasts</span><span class="panel-meta">Generated from model predictions</span></div>
+    <div class="panel-body">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+        {% for image in forecast_images %}
+        <div style="text-align:center"><img src="{{ image.url }}" alt="{{ image.title }}" style="max-width:100%;height:auto;border-radius:8px"><div style="font-size:12px;color:var(--text-muted);margin-top:8px">{{ image.title }}</div></div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE: LIVE PREDICTIONS
+════════════════════════════════════════ -->
+<div class="page" id="page-predictions">
+  <div class="stat-grid">
+    <div class="stat-card c-red"><div class="stat-icon"><i class="bi bi-exclamation-octagon"></i></div><div class="stat-delta delta-down">↑ 2</div><div class="stat-value">{{ critical_predictions }}</div><div class="stat-label">Critical Predictions</div></div>
+    <div class="stat-card c-amber"><div class="stat-icon"><i class="bi bi-activity"></i></div><div class="stat-value">{{ active_forecasts }}</div><div class="stat-label">Active Forecasts</div></div>
+    <div class="stat-card c-teal"><div class="stat-icon"><i class="bi bi-check-circle"></i></div><div class="stat-delta delta-up">↑ 3%</div><div class="stat-value">{{ avg_confidence }}%</div><div class="stat-label">Avg Confidence</div></div>
+    <div class="stat-card c-blue"><div class="stat-icon"><i class="bi bi-clock-history"></i></div><div class="stat-value">14m</div><div class="stat-label">Last Prediction Run</div></div>
+  </div>
+  <div class="grid-2" style="margin-bottom:1.5rem">
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Run New Prediction</span><span class="panel-meta">Hybrid Ensemble Active</span></div>
+      <div class="panel-body" style="display:flex;flex-direction:column;gap:14px">
+        <form method="post">
+          {% csrf_token %}
+          <div>
+            <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">Disease / Disaster Type</div>
+            <select class="form-control-dark" name="disease_type">
+              {% for disease in disease_options %}
+              <option value="{{ disease.value }}" {% if disease.value == selected_disease %}selected{% endif %}>{{ disease.label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">Kenya Climatic Region</div>
+            <select class="form-control-dark" name="region">
+              {% for region in region_options %}
+              <option value="{{ region.value }}" {% if region.value == selected_region %}selected{% endif %}>{{ region.label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">Forecast Horizon</div>
+            <select class="form-control-dark" name="horizon">
+              {% for horizon in horizon_options %}
+              <option value="{{ horizon.value }}" {% if horizon.value == selected_horizon %}selected{% endif %}>{{ horizon.label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div style="display:flex;gap:10px">
+            <button type="submit" class="btn-primary-ai"><i class="bi bi-play-fill"></i> Run Prediction</button>
+            <button type="reset" class="btn-ghost">Reset</button>
+          </div>
+        </form>
+        {% if prediction_result %}
+        <div style="background:rgba(0,229,195,.06);border:1px solid rgba(0,229,195,.2);border-radius:8px;padding:1rem">
+          <div style="font-size:11px;color:var(--accent-teal);margin-bottom:4px">PREDICTION RESULT</div>
+          <div style="font-size:22px;font-weight:600;font-family:var(--font-mono);color:var(--accent-teal)">{{ prediction_result.confidence }}% <span style="font-size:13px;color:var(--text-muted)">risk confidence</span></div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:6px">
+            Risk: <span class="risk-pill risk-{{ prediction_result.risk_css }}">{{ prediction_result.risk }}</span> · 
+            Forecast: {{ prediction_result.horizon }} · 
+            County: {{ prediction_result.region }} · 
+            Climate Zone: {{ prediction_result.climate_region }} · 
+            Type: {{ prediction_result.disease_type }}
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:6px">Primary drivers: {{ prediction_result.drivers|join:", " }}</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:4px">Generated: {{ prediction_result.timestamp }}</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Prediction Confidence by Climate Region</span></div>
+      <div class="panel-body"><div class="chart-wrap" style="height:280px"><canvas id="predBarChart"></canvas></div></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-header"><span class="panel-title">Recent Prediction Log</span><span class="panel-meta">Auto-refreshes every 15 min</span></div>
+    <div class="panel-body" style="padding:0">
+      <table class="data-table">
+        <thead><tr><th>Timestamp</th><th>Region</th><th>Type</th><th>Model</th><th>Confidence</th><th>Risk</th><th>Horizon</th></tr></thead>
+        <tbody>
+          {% for row in prediction_log %}
+          <tr><td style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">{{ row.timestamp }}</td><td>{{ row.region }}</td><td>{{ row.type }}</td><td>{{ row.model }}</td><td style="font-family:var(--font-mono);font-size:12px">{{ row.confidence }}%</td><td><span class="risk-pill risk-{{ row.risk_css }}">{{ row.risk }}</span></td><td style="color:var(--text-muted);font-size:12px">{{ row.horizon }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE: RISK MAP
+════════════════════════════════════════ -->
+<div class="page" id="page-riskmap">
+  <div class="stat-grid">
+    <div class="stat-card c-red"><div class="stat-icon"><i class="bi bi-geo-alt"></i></div><div class="stat-value">{{ critical_zones }}</div><div class="stat-label">Critical Zones</div></div>
+    <div class="stat-card c-amber"><div class="stat-icon"><i class="bi bi-shield-exclamation"></i></div><div class="stat-value">{{ high_risk_zones }}</div><div class="stat-label">High Risk Zones</div></div>
+    <div class="stat-card c-blue"><div class="stat-icon"><i class="bi bi-pin-map"></i></div><div class="stat-value">{{ monitored_regions }}</div><div class="stat-label">Monitored Regions</div></div>
+    <div class="stat-card c-teal"><div class="stat-icon"><i class="bi bi-shield-check"></i></div><div class="stat-value">{{ low_risk_zones }}</div><div class="stat-label">Low Risk Zones</div></div>
+  </div>
+  <div class="grid-2-1" style="margin-bottom:1.5rem">
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Kenya Risk Map — Disease & Disaster</span><span class="panel-meta">Dataset snapshot · {{ data_latest_date }}</span></div>
+      <div class="panel-body">
+        <div id="heatmap-container" style="background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:10px;height:380px;position:relative;overflow:hidden">
+          <div id="map" style="width:100%;height:100%;border-radius:8px"></div>
+          <div style="position:absolute;bottom:12px;left:12px;display:flex;gap:10px;flex-wrap:wrap;z-index:10">
+            <span style="font-size:10px;display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.5);padding:3px 8px;border-radius:6px"><span style="width:8px;height:8px;border-radius:50%;background:#ff4d6d;display:inline-block"></span>Critical</span>
+            <span style="font-size:10px;display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.5);padding:3px 8px;border-radius:6px"><span style="width:8px;height:8px;border-radius:50%;background:#f5a623;display:inline-block"></span>High</span>
+            <span style="font-size:10px;display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.5);padding:3px 8px;border-radius:6px"><span style="width:8px;height:8px;border-radius:50%;background:#4da6ff;display:inline-block"></span>Moderate</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Zone Risk Summary</span></div>
+      <div class="panel-body">
+        <table class="data-table">
+          <thead><tr><th>Zone</th><th>Top Threat</th><th>Risk</th></tr></thead>
+          <tbody>
+            {% for zone in risk_zones %}
+            <tr data-threat="{{ zone.top_threat }}"><td>{{ zone.label }}</td><td>{{ zone.top_threat }}</td><td><span class="risk-pill risk-{{ zone.risk_css }}">{{ zone.risk }}</span></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <div style="margin-top:1rem">
+          <div class="section-heading">Filter by Threat</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <button class="btn-ghost risk-filter-btn active" style="font-size:11px;padding:4px 10px" data-threat="All" onclick="filterRiskZones('All', this)">All</button>
+            <button class="btn-ghost risk-filter-btn" style="font-size:11px;padding:4px 10px" data-threat="Malaria" onclick="filterRiskZones('Malaria', this)">Malaria</button>
+            <button class="btn-ghost risk-filter-btn" style="font-size:11px;padding:4px 10px" data-threat="Cholera" onclick="filterRiskZones('Cholera', this)">Cholera</button>
+            <button class="btn-ghost risk-filter-btn" style="font-size:11px;padding:4px 10px" data-threat="Dengue Fever" onclick="filterRiskZones('Dengue Fever', this)">Dengue</button>
+            <button class="btn-ghost risk-filter-btn" style="font-size:11px;padding:4px 10px" data-threat="Flood" onclick="filterRiskZones('Flood', this)">Flood</button>
+            <button class="btn-ghost risk-filter-btn" style="font-size:11px;padding:4px 10px" data-threat="Drought" onclick="filterRiskZones('Drought', this)">Drought</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE: DATA INGESTION
+════════════════════════════════════════ -->
+<div class="page" id="page-emergencies">
+  <div class="stat-grid">
+    <div class="stat-card c-red"><div class="stat-icon"><i class="bi bi-broadcast"></i></div><div class="stat-value">{{ community_alert_count }}</div><div class="stat-label">Open Emergency Alerts</div></div>
+    <div class="stat-card c-amber"><div class="stat-icon"><i class="bi bi-hourglass-split"></i></div><div class="stat-value">{{ community_emergency_new }}</div><div class="stat-label">New Reports</div></div>
+    <div class="stat-card c-blue"><div class="stat-icon"><i class="bi bi-clipboard-pulse"></i></div><div class="stat-value">{{ community_emergency_in_progress }}</div><div class="stat-label">Under Review</div></div>
+    <div class="stat-card c-green"><div class="stat-icon"><i class="bi bi-check2-circle"></i></div><div class="stat-value">{{ community_emergency_resolved }}</div><div class="stat-label">Resolved Reports</div></div>
+  </div>
+  <div class="grid-2-1" style="margin-bottom:1.5rem">
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Community Emergency Intake Queue</span><span class="panel-meta">{{ community_emergency_total }} total reports</span></div>
+      {% if emergency_reports %}
+      <div class="panel-body" style="padding:0">
+        <table class="data-table">
+          <thead><tr><th>County</th><th>Incident</th><th>People</th><th>Severity</th><th>Status</th><th>Response</th></tr></thead>
+          <tbody>
+            {% for report in emergency_reports %}
+            <tr>
+              <td>
+                <div>{{ report.county }}</div>
+                {% if report.location_detail %}
+                <div style="font-size:11px;color:var(--text-muted)">{{ report.location_detail }}</div>
+                {% endif %}
+                <div style="font-size:10px;color:var(--text-dim);font-family:var(--font-mono)">{{ report.created_at_display }}</div>
+              </td>
+              <td>
+                <div>{{ report.get_emergency_type_display }}</div>
+                <div style="font-size:11px;color:var(--text-muted);max-width:280px">{{ report.description|truncatechars:120 }}</div>
+                <div style="font-size:11px;color:var(--text-muted)">
+                  Reporter: {{ report.reporter_display }}{% if report.reporter_phone %} · {{ report.reporter_phone }}{% endif %}
+                </div>
+              </td>
+              <td style="font-family:var(--font-mono)">{{ report.people_affected }}</td>
+              <td><span class="risk-pill risk-{{ report.severity_css }}">{{ report.get_severity_display }}</span></td>
+              <td><span class="badge-pill badge-{{ report.status_badge_css }}">{{ report.get_status_display }}</span></td>
+              <td>
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  {% if report.status != 'acknowledged' %}
+                  <form method="post" action="{% url 'admin_dashboard:update_emergency_report_status' report.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="status" value="acknowledged">
+                    <input type="hidden" name="return_page" value="emergencies">
+                    <button type="submit" class="btn-ghost" style="font-size:11px;padding:4px 9px">Acknowledge</button>
+                  </form>
+                  {% endif %}
+                  {% if report.status != 'in_progress' and report.status != 'resolved' %}
+                  <form method="post" action="{% url 'admin_dashboard:update_emergency_report_status' report.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="status" value="in_progress">
+                    <input type="hidden" name="return_page" value="emergencies">
+                    <button type="submit" class="btn-ghost" style="font-size:11px;padding:4px 9px">Start Work</button>
+                  </form>
+                  {% endif %}
+                  {% if report.status != 'resolved' %}
+                  <form method="post" action="{% url 'admin_dashboard:update_emergency_report_status' report.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="status" value="resolved">
+                    <input type="hidden" name="return_page" value="emergencies">
+                    <button type="submit" class="btn-primary-ai" style="font-size:11px;padding:4px 9px">Resolve</button>
+                  </form>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="panel-body">
+        <div style="font-size:12.5px;color:var(--text-muted)">No emergency reports have been submitted yet from the community dashboard.</div>
+      </div>
+      {% endif %}
+    </div>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Admin Handling Guide</span></div>
+      <div class="panel-body">
+        <div class="timeline-item"><div class="tl-dot" style="background:var(--accent-red)"></div><div><div class="tl-text">Critical and high-severity reports should be acknowledged first.</div><div class="tl-time">Priority rule</div></div></div>
+        <div class="timeline-item"><div class="tl-dot" style="background:var(--accent-amber)"></div><div><div class="tl-text">Use county, location detail, and description to route the alert quickly.</div><div class="tl-time">Triage rule</div></div></div>
+        <div class="timeline-item"><div class="tl-dot" style="background:var(--accent-blue)"></div><div><div class="tl-text">Move reports to In Progress once a responder or team has taken ownership.</div><div class="tl-time">Tracking rule</div></div></div>
+        <div class="timeline-item"><div class="tl-dot" style="background:var(--accent-green)"></div><div><div class="tl-text">Mark a report Resolved only after the incident is closed or handed off.</div><div class="tl-time">Closure rule</div></div></div>
+        <div class="section-heading" style="margin-top:1.25rem">Live Summary</div>
+        <div class="info-row"><span class="info-label">Critical open incidents</span><span class="info-val" style="color:var(--accent-red)">{{ community_emergency_critical }}</span></div>
+        <div class="info-row"><span class="info-label">Newest queue size</span><span class="info-val">{{ community_emergency_new }}</span></div>
+        <div class="info-row"><span class="info-label">Currently managed</span><span class="info-val">{{ community_emergency_in_progress }}</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-ingestion">
+  <div class="stat-grid">
+    <div class="stat-card c-teal"><div class="stat-icon"><i class="bi bi-cloud-check"></i></div><div class="stat-value">3/3</div><div class="stat-label">Sources Online</div></div>
+    <div class="stat-card c-blue"><div class="stat-icon"><i class="bi bi-arrow-repeat"></i></div><div class="stat-value">142</div><div class="stat-label">Records Last Sync</div></div>
+    <div class="stat-card c-amber"><div class="stat-icon"><i class="bi bi-clock"></i></div><div class="stat-value">2m ago</div><div class="stat-label">Last Ingestion</div></div>
+    <div class="stat-card c-green"><div class="stat-icon"><i class="bi bi-hdd"></i></div><div class="stat-value">35,284</div><div class="stat-label">Total Samples</div></div>
+  </div>
+  <div class="grid-2" style="margin-bottom:1.5rem">
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Data Sources</span><span class="panel-meta">config.yaml · 3 active</span></div>
+      <div class="panel-body">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:1rem">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <div style="display:flex;align-items:center;gap:8px"><i class="bi bi-cloud-sun" style="color:var(--accent-teal)"></i><span style="font-size:13px;font-weight:500">NASA POWER</span></div>
+              <span class="badge-pill badge-teal">Online</span>
+            </div>
+            <div class="info-row"><span class="info-label">Endpoint</span><span class="info-val" style="font-size:10px;color:var(--text-dim)">power.larc.nasa.gov/api/temporal/daily/point</span></div>
+            <div class="info-row"><span class="info-label">Parameters</span><span class="info-val">T2M, PRECTOTCORR, RH2M, WS2M</span></div>
+            <div class="info-row"><span class="info-label">Date Range</span><span class="info-val">2017-01-01 → 2026-02-01</span></div>
+            <div class="info-row"><span class="info-label">Location</span><span class="info-val">-1.2921°N, 36.8219°E</span></div>
+            <button class="btn-primary-ai" style="margin-top:10px;font-size:12px;padding:.4rem 1rem" onclick="alert('Syncing NASA POWER...')"><i class="bi bi-arrow-repeat"></i> Sync Now</button>
+          </div>
+          <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:1rem">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <div style="display:flex;align-items:center;gap:8px"><i class="bi bi-hospital" style="color:var(--accent-blue)"></i><span style="font-size:13px;font-weight:500">WHO GHO</span></div>
+              <span class="badge-pill badge-blue">Online</span>
+            </div>
+            <div class="info-row"><span class="info-label">Endpoint</span><span class="info-val" style="font-size:10px;color:var(--text-dim)">ghoapi.azureedge.net/api/Indicator</span></div>
+            <div class="info-row"><span class="info-label">Last Sync</span><span class="info-val">142 records · 1h ago</span></div>
+            <button class="btn-ghost" style="margin-top:10px;font-size:12px;padding:.4rem 1rem" onclick="alert('Syncing WHO GHO...')"><i class="bi bi-arrow-repeat"></i> Sync Now</button>
+          </div>
+          <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:1rem">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <div style="display:flex;align-items:center;gap:8px"><i class="bi bi-lightning" style="color:var(--accent-amber)"></i><span style="font-size:13px;font-weight:500">EM-DAT</span></div>
+              <span class="badge-pill badge-amber">Manual Upload</span>
+            </div>
+            <div class="info-row"><span class="info-label">Source</span><span class="info-val" style="font-size:10px;color:var(--text-dim)">public.emdat.be/data</span></div>
+            <div class="info-row"><span class="info-label">Last Upload</span><span class="info-val">6h ago</span></div>
+            <button class="btn-ghost" style="margin-top:10px;font-size:12px;padding:.4rem 1rem"><i class="bi bi-upload"></i> Upload File</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Ingestion Log</span></div>
+      <div class="panel-body" style="padding:0">
+        <div class="log-line"><span class="log-time">09:14:22</span><span class="log-level-ok">[OK]</span><span>NASA POWER fetch complete — 288 rows</span></div>
+        <div class="log-line"><span class="log-time">09:14:18</span><span class="log-level-info">[INFO]</span><span>Connecting to NASA POWER API...</span></div>
+        <div class="log-line"><span class="log-time">08:52:11</span><span class="log-level-ok">[OK]</span><span>WHO GHO sync — 142 indicators</span></div>
+        <div class="log-line"><span class="log-time">08:51:44</span><span class="log-level-info">[INFO]</span><span>KNN imputation applied (k=5)</span></div>
+        <div class="log-line"><span class="log-time">08:50:33</span><span class="log-level-warn">[WARN]</span><span>3 outliers removed (z > 3.0)</span></div>
+        <div class="log-line"><span class="log-time">08:49:01</span><span class="log-level-ok">[OK]</span><span>Data cleaning pipeline complete</span></div>
+        <div class="log-line"><span class="log-time">06:30:00</span><span class="log-level-ok">[OK]</span><span>EM-DAT file uploaded — 512 events</span></div>
+        <div class="log-line"><span class="log-time">06:29:48</span><span class="log-level-info">[INFO]</span><span>Pearson threshold filtering (r=0.7)</span></div>
+        <div class="log-line"><span class="log-time">06:28:55</span><span class="log-level-info">[INFO]</span><span>RFE feature selection — 10 features</span></div>
+        <div class="log-line"><span class="log-time">06:28:10</span><span class="log-level-ok">[OK]</span><span>Feature engineering complete</span></div>
+        <div class="log-line"><span class="log-time">05:00:00</span><span class="log-level-info">[INFO]</span><span>Scheduled ingestion job started</span></div>
+      </div>
+      <div class="panel-header" style="border-top:1px solid var(--border);border-bottom:none"><span class="panel-title">Pipeline Config</span></div>
+      <div class="panel-body">
+        <div class="info-row"><span class="info-label">KNN neighbors</span><span class="info-val">5</span></div>
+        <div class="info-row"><span class="info-label">Z-score threshold</span><span class="info-val">3.0</span></div>
+        <div class="info-row"><span class="info-label">Pearson threshold</span><span class="info-val">0.7</span></div>
+        <div class="info-row"><span class="info-label">RFE features</span><span class="info-val">10</span></div>
+        <div class="info-row"><span class="info-label">Target samples</span><span class="info-val">35,000</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE: CLIMATE DATA
+════════════════════════════════════════ -->
+<div class="page" id="page-climate">
+  <div class="stat-grid">
+    <div class="stat-card c-amber"><div class="stat-icon"><i class="bi bi-thermometer-half"></i></div><div class="stat-value">22.4°C</div><div class="stat-label">Avg Temp (T2M)</div></div>
+    <div class="stat-card c-blue"><div class="stat-icon"><i class="bi bi-cloud-rain"></i></div><div class="stat-value">8.2mm</div><div class="stat-label">Precipitation</div></div>
+    <div class="stat-card c-teal"><div class="stat-icon"><i class="bi bi-droplet"></i></div><div class="stat-value">74%</div><div class="stat-label">Humidity (RH2M)</div></div>
+    <div class="stat-card c-blue"><div class="stat-icon"><i class="bi bi-wind"></i></div><div class="stat-value">3.1 m/s</div><div class="stat-label">Wind Speed (WS2M)</div></div>
+  </div>
+  <div class="panel" style="margin-bottom:1.5rem">
+    <div class="panel-header"><span class="panel-title">Climate Trends — Kenya Regional Averages</span><span class="panel-meta">NASA POWER fixture · Monthly 2023</span></div>
+    <div class="panel-body"><div class="chart-wrap" style="height:250px"><canvas id="climateChart"></canvas></div></div>
+  </div>
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Monthly Averages</span></div>
+      <div class="panel-body">
+        <table class="data-table">
+          <thead><tr><th>Month</th><th>Temp °C</th><th>Rain mm</th><th>Humidity %</th><th>Wind m/s</th></tr></thead>
+          <tbody>
+            <tr><td>Oct 2025</td><td style="font-family:var(--font-mono)">21.1</td><td style="font-family:var(--font-mono)">62.4</td><td style="font-family:var(--font-mono)">78</td><td style="font-family:var(--font-mono)">2.8</td></tr>
+            <tr><td>Nov 2025</td><td style="font-family:var(--font-mono)">20.8</td><td style="font-family:var(--font-mono)">88.2</td><td style="font-family:var(--font-mono)">82</td><td style="font-family:var(--font-mono)">2.5</td></tr>
+            <tr><td>Dec 2025</td><td style="font-family:var(--font-mono)">21.4</td><td style="font-family:var(--font-mono)">44.1</td><td style="font-family:var(--font-mono)">76</td><td style="font-family:var(--font-mono)">3.0</td></tr>
+            <tr><td>Jan 2026</td><td style="font-family:var(--font-mono)">22.0</td><td style="font-family:var(--font-mono)">18.3</td><td style="font-family:var(--font-mono)">70</td><td style="font-family:var(--font-mono)">3.4</td></tr>
+            <tr><td>Feb 2026</td><td style="font-family:var(--font-mono)">22.9</td><td style="font-family:var(--font-mono)">12.7</td><td style="font-family:var(--font-mono)">68</td><td style="font-family:var(--font-mono)">3.6</td></tr>
+            <tr><td>Mar 2026</td><td style="font-family:var(--font-mono)">22.4</td><td style="font-family:var(--font-mono)">8.2</td><td style="font-family:var(--font-mono)">74</td><td style="font-family:var(--font-mono)">3.1</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Climate Risk Indicators</span></div>
+      <div class="panel-body">
+        <div style="margin-bottom:1.25rem">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Malaria Risk (Temp + Humidity)</span><span style="font-family:var(--font-mono);color:var(--accent-red)">High</span></div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:82%;background:var(--accent-red)"></div></div>
+        </div>
+        <div style="margin-bottom:1.25rem">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Cholera Risk (Rainfall + Humidity)</span><span style="font-family:var(--font-mono);color:var(--accent-amber)">Moderate</span></div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:58%;background:var(--accent-amber)"></div></div>
+        </div>
+        <div style="margin-bottom:1.25rem">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Flood Risk (Precipitation Index)</span><span style="font-family:var(--font-mono);color:var(--accent-blue)">Low</span></div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:22%;background:var(--accent-blue)"></div></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Drought Risk (Temp + Low Rain)</span><span style="font-family:var(--font-mono);color:var(--accent-teal)">Low</span></div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:18%;background:var(--accent-teal)"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE: HEALTH RECORDS
+════════════════════════════════════════ -->
+<div class="page" id="page-health">
+  <div class="stat-grid">
+    <div class="stat-card c-blue"><div class="stat-icon"><i class="bi bi-person-lines-fill"></i></div><div class="stat-value">18,420</div><div class="stat-label">Health Records</div></div>
+    <div class="stat-card c-red"><div class="stat-icon"><i class="bi bi-bug"></i></div><div class="stat-value">4,211</div><div class="stat-label">Disease Incidences</div></div>
+    <div class="stat-card c-teal"><div class="stat-icon"><i class="bi bi-hospital"></i></div><div class="stat-value">WHO GHO</div><div class="stat-label">Primary Source</div></div>
+    <div class="stat-card c-amber"><div class="stat-icon"><i class="bi bi-calendar3"></i></div><div class="stat-value">2017–2026</div><div class="stat-label">Data Range</div></div>
+  </div>
+  <div class="grid-2-1" style="margin-bottom:1.5rem">
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Disease Incidence Over Time</span><span class="panel-meta">Monthly 2023</span></div>
+      <div class="panel-body"><div class="chart-wrap" style="height:240px"><canvas id="healthChart"></canvas></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">By Disease Type</span></div>
+      <div class="panel-body"><div class="chart-wrap" style="height:240px"><canvas id="healthDoughnut"></canvas></div></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-header"><span class="panel-title">Health Records</span><span class="panel-meta">WHO GHO · Aggregated · No PII</span></div>
+    <div class="panel-body" style="padding:0">
+      <table class="data-table">
+        <thead><tr><th>Date</th><th>Region</th><th>Disease</th><th>Cases</th><th>Deaths</th><th>CFR %</th><th>Source</th></tr></thead>
+        <tbody>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">2026-03</td><td>Nairobi</td><td>Malaria</td><td style="font-family:var(--font-mono)">1,284</td><td style="font-family:var(--font-mono)">12</td><td style="font-family:var(--font-mono);color:var(--accent-red)">0.93%</td><td style="color:var(--text-muted);font-size:12px">WHO GHO</td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">2026-03</td><td>Mombasa</td><td>Cholera</td><td style="font-family:var(--font-mono)">342</td><td style="font-family:var(--font-mono)">4</td><td style="font-family:var(--font-mono);color:var(--accent-amber)">1.17%</td><td style="color:var(--text-muted);font-size:12px">WHO GHO</td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">2026-02</td><td>Kisumu</td><td>Malaria</td><td style="font-family:var(--font-mono)">892</td><td style="font-family:var(--font-mono)">7</td><td style="font-family:var(--font-mono);color:var(--accent-amber)">0.78%</td><td style="color:var(--text-muted);font-size:12px">CDC</td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">2026-01</td><td>Nakuru</td><td>Dengue</td><td style="font-family:var(--font-mono)">117</td><td style="font-family:var(--font-mono)">1</td><td style="font-family:var(--font-mono);color:var(--accent-teal)">0.85%</td><td style="color:var(--text-muted);font-size:12px">WHO GHO</td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">2025-12</td><td>Eldoret</td><td>Cholera</td><td style="font-family:var(--font-mono)">58</td><td style="font-family:var(--font-mono)">0</td><td style="font-family:var(--font-mono);color:var(--accent-teal)">0.00%</td><td style="color:var(--text-muted);font-size:12px">WHO GHO</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE: DISASTER EVENTS
+════════════════════════════════════════ -->
+<div class="page" id="page-disasters">
+  <div class="stat-grid">
+    <div class="stat-card c-red"><div class="stat-icon"><i class="bi bi-water"></i></div><div class="stat-value">38</div><div class="stat-label">Flood Events</div></div>
+    <div class="stat-card c-amber"><div class="stat-icon"><i class="bi bi-sun"></i></div><div class="stat-value">14</div><div class="stat-label">Drought Events</div></div>
+    <div class="stat-card c-blue"><div class="stat-icon"><i class="bi bi-lightning-charge"></i></div><div class="stat-value">512</div><div class="stat-label">Total EM-DAT Records</div></div>
+    <div class="stat-card c-teal"><div class="stat-icon"><i class="bi bi-calendar-range"></i></div><div class="stat-value">2017–2026</div><div class="stat-label">Coverage Period</div></div>
+  </div>
+  <div class="panel" style="margin-bottom:1.5rem">
+    <div class="panel-header"><span class="panel-title">Disaster Events Timeline</span><span class="panel-meta">EM-DAT fixture · Monthly 2023</span></div>
+    <div class="panel-body"><div class="chart-wrap" style="height:220px"><canvas id="disasterChart"></canvas></div></div>
+  </div>
+  <div class="panel">
+    <div class="panel-header"><span class="panel-title">Disaster Event Log</span><span class="panel-meta">Source: EM-DAT</span></div>
+    <div class="panel-body" style="padding:0">
+      <table class="data-table">
+        <thead><tr><th>Date</th><th>Type</th><th>Region</th><th>Affected</th><th>Deaths</th><th>Damage (USD)</th><th>Severity</th></tr></thead>
+        <tbody>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">2026-02-14</td><td><i class="bi bi-water" style="color:var(--accent-blue)"></i> Flood</td><td>Kisumu</td><td style="font-family:var(--font-mono)">1400</td><td style="font-family:var(--font-mono)">3</td><td style="font-family:var(--font-mono)">Ksh 250k</td><td><span class="risk-pill risk-high">High</span></td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">2025-11-03</td><td><i class="bi bi-water" style="color:var(--accent-blue)"></i> Flood</td><td>Nairobi</td><td style="font-family:var(--font-mono)">200</td><td style="font-family:var(--font-mono)">3</td><td style="font-family:var(--font-mono)">ksh 100k</td><td><span class="risk-pill risk-moderate">Moderate</span></td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">2025-08-20</td><td><i class="bi bi-sun" style="color:var(--accent-amber)"></i> Drought</td><td>Eldoret</td><td style="font-family:var(--font-mono)">2,000</td><td style="font-family:var(--font-mono)">0</td><td style="font-family:var(--font-mono)">ksh 500k</td><td><span class="risk-pill risk-high">High</span></td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">2025-04-11</td><td><i class="bi bi-water" style="color:var(--accent-blue)"></i> Flood</td><td>Mombasa</td><td style="font-family:var(--font-mono)">600</td><td style="font-family:var(--font-mono)">2</td><td style="font-family:var(--font-mono)"> ksh 600K</td><td><span class="risk-pill risk-moderate">Moderate</span></td></tr>
+          <tr><td style="font-family:var(--font-mono);font-size:11px">2024-10-28</td><td><i class="bi bi-sun" style="color:var(--accent-amber)"></i> Drought</td><td>Nakuru</td><td style="font-family:var(--font-mono)">8,000</td><td style="font-family:var(--font-mono)">0</td><td style="font-family:var(--font-mono)">ksh 120k</td><td><span class="risk-pill risk-moderate">Moderate</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE: LSTM MODEL
+════════════════════════════════════════ -->
+<div class="page" id="page-lstm">
+  <div class="stat-grid">
+    <div class="stat-card c-teal"><div class="stat-icon"><i class="bi bi-cpu"></i></div><div class="stat-value">0.891</div><div class="stat-label">F1 Score</div></div>
+    <div class="stat-card c-blue"><div class="stat-icon"><i class="bi bi-graph-up"></i></div><div class="stat-value">0.924</div><div class="stat-label">ROC-AUC</div></div>
+    <div class="stat-card c-amber"><div class="stat-icon"><i class="bi bi-layers"></i></div><div class="stat-value">50</div><div class="stat-label">Epochs Trained</div></div>
+    <div class="stat-card c-green"><div class="stat-icon"><i class="bi bi-check-circle"></i></div><div class="stat-value">Ready</div><div class="stat-label">Model Status</div></div>
+  </div>
+  <div class="grid-2-1" style="margin-bottom:1.5rem">
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Training Loss & Validation Loss</span></div>
+      <div class="panel-body"><div class="chart-wrap" style="height:240px"><canvas id="lstmLossChart"></canvas></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Architecture</span></div>
+      <div class="panel-body">
+        <div class="info-row"><span class="info-label">Units</span><span class="info-val">64</span></div>
+        <div class="info-row"><span class="info-label">Dropout</span><span class="info-val">0.2</span></div>
+        <div class="info-row"><span class="info-label">Epochs</span><span class="info-val">50</span></div>
+        <div class="info-row"><span class="info-label">Batch size</span><span class="info-val">32</span></div>
+        <div class="info-row"><span class="info-label">Lookback</span><span class="info-val">12</span></div>
+        <div class="info-row"><span class="info-label">Test split</span><span class="info-val">15%</span></div>
+        <div class="info-row"><span class="info-label">Val split</span><span class="info-val">15%</span></div>
+        <div style="margin-top:1.25rem">
+          <div class="section-heading">Evaluation Metrics</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="metric-mini"><div class="metric-mini-val" style="color:var(--accent-teal)">89.1%</div><div class="metric-mini-label">Accuracy</div></div>
+            <div class="metric-mini"><div class="metric-mini-val" style="color:var(--accent-blue)">88.7%</div><div class="metric-mini-label">Precision</div></div>
+            <div class="metric-mini"><div class="metric-mini-val" style="color:var(--accent-amber)">90.4%</div><div class="metric-mini-label">Recall</div></div>
+            <div class="metric-mini"><div class="metric-mini-val" style="color:var(--accent-green)">0.043</div><div class="metric-mini-label">RMSE</div></div>
+          </div>
+        </div>
+        <div style="margin-top:1rem;display:flex;gap:8px">
+          <button class="btn-primary-ai" style="font-size:12px;padding:.4rem 1rem" onclick="alert('Starting LSTM retrain...')"><i class="bi bi-play-fill"></i> Retrain</button>
+          <button class="btn-ghost" style="font-size:12px;padding:.4rem 1rem"><i class="bi bi-download"></i> Export</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE: XGBOOST MODEL
+════════════════════════════════════════ -->
+<div class="page" id="page-xgboost">
+  <div class="stat-grid">
+    <div class="stat-card c-blue"><div class="stat-icon"><i class="bi bi-diagram-3"></i></div><div class="stat-value">0.870</div><div class="stat-label">F1 Score</div></div>
+    <div class="stat-card c-teal"><div class="stat-icon"><i class="bi bi-graph-up"></i></div><div class="stat-value">0.901</div><div class="stat-label">ROC-AUC</div></div>
+    <div class="stat-card c-amber"><div class="stat-icon"><i class="bi bi-tree"></i></div><div class="stat-value">200</div><div class="stat-label">Estimators</div></div>
+    <div class="stat-card c-green"><div class="stat-icon"><i class="bi bi-check-circle"></i></div><div class="stat-value">Ready</div><div class="stat-label">Model Status</div></div>
+  </div>
+  <div class="grid-2-1" style="margin-bottom:1.5rem">
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Feature Importance (Top 10)</span></div>
+      <div class="panel-body"><div class="chart-wrap" style="height:280px"><canvas id="xgbFeatChart"></canvas></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Hyperparameters</span></div>
+      <div class="panel-body">
+        <div class="info-row"><span class="info-label">n_estimators</span><span class="info-val">200</span></div>
+        <div class="info-row"><span class="info-label">max_depth</span><span class="info-val">5</span></div>
+        <div class="info-row"><span class="info-label">learning_rate</span><span class="info-val">0.1</span></div>
+        <div class="info-row"><span class="info-label">CV folds</span><span class="info-val">5</span></div>
+        <div class="info-row"><span class="info-label">Test size</span><span class="info-val">15%</span></div>
+        <div class="info-row"><span class="info-label">Random seed</span><span class="info-val">42</span></div>
+        <div style="margin-top:1.25rem">
+          <div class="section-heading">Metrics</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="metric-mini"><div class="metric-mini-val" style="color:var(--accent-blue)">87.0%</div><div class="metric-mini-label">Accuracy</div></div>
+            <div class="metric-mini"><div class="metric-mini-val" style="color:var(--accent-teal)">86.2%</div><div class="metric-mini-label">Precision</div></div>
+            <div class="metric-mini"><div class="metric-mini-val" style="color:var(--accent-amber)">88.1%</div><div class="metric-mini-label">Recall</div></div>
+            <div class="metric-mini"><div class="metric-mini-val" style="color:var(--accent-green)">0.051</div><div class="metric-mini-label">MAE</div></div>
+          </div>
+        </div>
+        <div style="margin-top:1rem;display:flex;gap:8px">
+          <button class="btn-primary-ai" style="font-size:12px;padding:.4rem 1rem" onclick="alert('Starting XGBoost grid search...')"><i class="bi bi-play-fill"></i> Grid Search</button>
+          <button class="btn-ghost" style="font-size:12px;padding:.4rem 1rem"><i class="bi bi-download"></i> Export</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE: HYBRID ENSEMBLE
+════════════════════════════════════════ -->
+<div class="page" id="page-hybrid">
+  <div class="stat-grid">
+    <div class="stat-card c-amber"><div class="stat-icon"><i class="bi bi-intersect"></i></div><div class="stat-value">0.910</div><div class="stat-label">F1 Score</div></div>
+    <div class="stat-card c-teal"><div class="stat-icon"><i class="bi bi-graph-up-arrow"></i></div><div class="stat-value">0.942</div><div class="stat-label">ROC-AUC</div></div>
+    <div class="stat-card c-blue"><div class="stat-icon"><i class="bi bi-award"></i></div><div class="stat-value">Best</div><div class="stat-label">Ranking vs Others</div></div>
+    <div class="stat-card c-green"><div class="stat-icon"><i class="bi bi-check-circle"></i></div><div class="stat-value">Active</div><div class="stat-label">Production Status</div></div>
+  </div>
+  <div class="grid-2" style="margin-bottom:1.5rem">
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Model Comparison — All Metrics</span></div>
+      <div class="panel-body"><div class="chart-wrap" style="height:260px"><canvas id="hybridRadar"></canvas></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Ensemble Weights</span></div>
+      <div class="panel-body">
+        <div style="margin-bottom:1.5rem">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px">LSTM</span><span style="font-family:var(--font-mono);font-size:12px;color:var(--accent-teal)">55%</span></div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:55%;background:var(--accent-teal)"></div></div>
+        </div>
+        <div style="margin-bottom:1.5rem">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px">XGBoost</span><span style="font-family:var(--font-mono);font-size:12px;color:var(--accent-blue)">45%</span></div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:45%;background:var(--accent-blue)"></div></div>
+        </div>
+        <div class="section-heading" style="margin-top:1.5rem">Config</div>
+        <div class="info-row"><span class="info-label">Random seed</span><span class="info-val">42</span></div>
+        <div class="info-row"><span class="info-label">Test size</span><span class="info-val">15%</span></div>
+        <div class="info-row"><span class="info-label">Val size</span><span class="info-val">15%</span></div>
+        <div class="info-row"><span class="info-label">Grid search CV</span><span class="info-val">5-fold</span></div>
+        <div style="margin-top:1.25rem;display:flex;gap:8px">
+          <button class="btn-primary-ai" style="font-size:12px;padding:.4rem 1rem" onclick="alert('Rebuilding ensemble...')"><i class="bi bi-arrow-repeat"></i> Rebuild</button>
+          <button class="btn-ghost" style="font-size:12px;padding:.4rem 1rem"><i class="bi bi-sliders"></i> Tune Weights</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE: XAI / EXPLAINABILITY
+════════════════════════════════════════ -->
+<div class="page" id="page-xai">
+  <div class="stat-grid">
+    <div class="stat-card c-purple"><div class="stat-icon"><i class="bi bi-eye"></i></div><div class="stat-value">SHAP</div><div class="stat-label">Primary XAI Method</div></div>
+    <div class="stat-card c-blue"><div class="stat-icon"><i class="bi bi-puzzle"></i></div><div class="stat-value">LIME</div><div class="stat-label">Secondary Method</div></div>
+    <div class="stat-card c-teal"><div class="stat-icon"><i class="bi bi-list-ol"></i></div><div class="stat-value">10</div><div class="stat-label">Top Features</div></div>
+    <div class="stat-card c-amber"><div class="stat-icon"><i class="bi bi-shield-check"></i></div><div class="stat-value">Ethical</div><div class="stat-label">Explainability Policy</div></div>
+  </div>
+  <div class="grid-2-1" style="margin-bottom:1.5rem">
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">SHAP Feature Importance — Malaria Prediction</span><span class="panel-meta">Hybrid model · Nairobi</span></div>
+      <div class="panel-body">
+        <div class="xai-bar-row"><div class="xai-feat">Temperature (T2M)</div><div class="xai-bar-wrap"><div class="xai-bar-fill" style="width:88%;background:var(--accent-red)"></div></div><div class="xai-val" style="color:var(--accent-red)">0.88</div></div>
+        <div class="xai-bar-row"><div class="xai-feat">Humidity (RH2M)</div><div class="xai-bar-wrap"><div class="xai-bar-fill" style="width:74%;background:var(--accent-amber)"></div></div><div class="xai-val" style="color:var(--accent-amber)">0.74</div></div>
+        <div class="xai-bar-row"><div class="xai-feat">Precipitation</div><div class="xai-bar-wrap"><div class="xai-bar-fill" style="width:68%;background:var(--accent-amber)"></div></div><div class="xai-val" style="color:var(--accent-amber)">0.68</div></div>
+        <div class="xai-bar-row"><div class="xai-feat">Prev. Cases (lag-1)</div><div class="xai-bar-wrap"><div class="xai-bar-fill" style="width:61%;background:var(--accent-blue)"></div></div><div class="xai-val" style="color:var(--accent-blue)">0.61</div></div>
+        <div class="xai-bar-row"><div class="xai-feat">Wind Speed</div><div class="xai-bar-wrap"><div class="xai-bar-fill" style="width:42%;background:var(--accent-teal)"></div></div><div class="xai-val" style="color:var(--accent-teal)">0.42</div></div>
+        <div class="xai-bar-row"><div class="xai-feat">Season</div><div class="xai-bar-wrap"><div class="xai-bar-fill" style="width:38%;background:var(--accent-teal)"></div></div><div class="xai-val" style="color:var(--accent-teal)">0.38</div></div>
+        <div class="xai-bar-row"><div class="xai-feat">Flood Event (lag)</div><div class="xai-bar-wrap"><div class="xai-bar-fill" style="width:31%;background:var(--accent-purple)"></div></div><div class="xai-val" style="color:var(--accent-purple)">0.31</div></div>
+        <div class="xai-bar-row"><div class="xai-feat">Pop. Density</div><div class="xai-bar-wrap"><div class="xai-bar-fill" style="width:24%;background:var(--accent-purple)"></div></div><div class="xai-val" style="color:var(--accent-purple)">0.24</div></div>
+        <div class="xai-bar-row"><div class="xai-feat">Drought Index</div><div class="xai-bar-wrap"><div class="xai-bar-fill" style="width:18%;background:var(--text-muted)"></div></div><div class="xai-val" style="color:var(--text-muted)">0.18</div></div>
+        <div class="xai-bar-row"><div class="xai-feat">Month</div><div class="xai-bar-wrap"><div class="xai-bar-fill" style="width:12%;background:var(--text-muted)"></div></div><div class="xai-val" style="color:var(--text-muted)">0.12</div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">LIME — Single Prediction</span></div>
+      <div class="panel-body">
+        <div style="background:rgba(255,77,109,.06);border:1px solid rgba(255,77,109,.2);border-radius:8px;padding:.85rem;margin-bottom:1rem">
+          <div style="font-size:10px;color:var(--accent-red);margin-bottom:4px">PREDICTION EXPLAINED</div>
+          <div style="font-size:14px;font-weight:500">Malaria — Nairobi · 94.2%</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">LIME local explanation · 10 features</div>
+        </div>
+        <div class="section-heading">Positive Contributions</div>
+        <div class="xai-bar-row"><div class="xai-feat" style="width:110px">Temp > 22°C</div><div class="xai-bar-wrap"><div class="xai-bar-fill" style="width:90%;background:var(--accent-red)"></div></div><div class="xai-val" style="color:var(--accent-red)">+0.34</div></div>
+        <div class="xai-bar-row"><div class="xai-feat" style="width:110px">Rain 8–15mm</div><div class="xai-bar-wrap"><div class="xai-bar-fill" style="width:70%;background:var(--accent-red)"></div></div><div class="xai-val" style="color:var(--accent-red)">+0.26</div></div>
+        <div class="xai-bar-row"><div class="xai-feat" style="width:110px">Humidity>70%</div><div class="xai-bar-wrap"><div class="xai-bar-fill" style="width:55%;background:var(--accent-amber)"></div></div><div class="xai-val" style="color:var(--accent-amber)">+0.21</div></div>
+        <div class="section-heading" style="margin-top:1rem">Negative Contributions</div>
+        <div class="xai-bar-row"><div class="xai-feat" style="width:110px">Wind > 3m/s</div><div class="xai-bar-wrap"><div class="xai-bar-fill" style="width:30%;background:var(--accent-teal)"></div></div><div class="xai-val" style="color:var(--accent-teal)">-0.11</div></div>
+        <div class="xai-bar-row"><div class="xai-feat" style="width:110px">Low flood lag</div><div class="xai-bar-wrap"><div class="xai-bar-fill" style="width:18%;background:var(--accent-teal)"></div></div><div class="xai-val" style="color:var(--accent-teal)">-0.07</div></div>
+        <div style="margin-top:1rem">
+          <div style="font-size:11px;color:var(--text-muted)">Ethics: All data is aggregated. No PII. GDPR-inspired policy.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE: EVALUATION
+════════════════════════════════════════ -->
+<div class="page" id="page-evaluation">
+  <div class="stat-grid">
+    <div class="stat-card c-teal"><div class="stat-icon"><i class="bi bi-trophy"></i></div><div class="stat-value">0.910</div><div class="stat-label">Best F1 (Hybrid)</div></div>
+    <div class="stat-card c-blue"><div class="stat-icon"><i class="bi bi-bar-chart-line"></i></div><div class="stat-value">0.942</div><div class="stat-label">Best ROC-AUC</div></div>
+    <div class="stat-card c-green"><div class="stat-icon"><i class="bi bi-check2-circle"></i></div><div class="stat-delta delta-up">↑ Target met</div><div class="stat-value">✓ 0.85</div><div class="stat-label">F1 Target</div></div>
+    <div class="stat-card c-amber"><div class="stat-icon"><i class="bi bi-calculator"></i></div><div class="stat-value">0.043</div><div class="stat-label">Best RMSE (LSTM)</div></div>
+  </div>
+  <div class="grid-2" style="margin-bottom:1.5rem">
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Metrics Comparison — All Models</span></div>
+      <div class="panel-body"><div class="chart-wrap" style="height:260px"><canvas id="evalGroupChart"></canvas></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Confusion Matrix — Hybrid (Malaria)</span></div>
+      <div class="panel-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;max-width:260px;margin:0 auto">
+          <div style="background:rgba(255,255,255,.04);border-radius:6px;padding:1.25rem;text-align:center;border:1px solid var(--border)">
+            <div style="font-size:24px;font-weight:600;font-family:var(--font-mono);color:var(--accent-teal)">4,821</div>
+            <div style="font-size:10px;color:var(--accent-teal);margin-top:4px">True Positive</div>
+          </div>
+          <div style="background:rgba(255,77,109,.06);border-radius:6px;padding:1.25rem;text-align:center;border:1px solid rgba(255,77,109,.15)">
+            <div style="font-size:24px;font-weight:600;font-family:var(--font-mono);color:var(--accent-red)">312</div>
+            <div style="font-size:10px;color:var(--accent-red);margin-top:4px">False Positive</div>
+          </div>
+          <div style="background:rgba(245,166,35,.06);border-radius:6px;padding:1.25rem;text-align:center;border:1px solid rgba(245,166,35,.15)">
+            <div style="font-size:24px;font-weight:600;font-family:var(--font-mono);color:var(--accent-amber)">284</div>
+            <div style="font-size:10px;color:var(--accent-amber);margin-top:4px">False Negative</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border-radius:6px;padding:1.25rem;text-align:center;border:1px solid var(--border)">
+            <div style="font-size:24px;font-weight:600;font-family:var(--font-mono);color:var(--accent-teal)">4,433</div>
+            <div style="font-size:10px;color:var(--accent-teal);margin-top:4px">True Negative</div>
+          </div>
+        </div>
+        <div style="margin-top:1.25rem">
+          <div class="info-row"><span class="info-label">Accuracy</span><span class="info-val" style="color:var(--accent-teal)">93.7%</span></div>
+          <div class="info-row"><span class="info-label">Precision</span><span class="info-val">93.9%</span></div>
+          <div class="info-row"><span class="info-label">Recall</span><span class="info-val">94.4%</span></div>
+          <div class="info-row"><span class="info-label">F1 Score</span><span class="info-val" style="color:var(--accent-amber)">0.910</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE: EXPORT REPORT
+════════════════════════════════════════ -->
+<div class="page" id="page-export">
+  <div class="stat-grid">
+    <div class="stat-card c-teal"><div class="stat-icon"><i class="bi bi-file-earmark-pdf"></i></div><div class="stat-value">12</div><div class="stat-label">Reports Generated</div></div>
+    <div class="stat-card c-blue"><div class="stat-icon"><i class="bi bi-file-earmark-spreadsheet"></i></div><div class="stat-value">CSV</div><div class="stat-label">Data Export Format</div></div>
+    <div class="stat-card c-amber"><div class="stat-icon"><i class="bi bi-calendar-check"></i></div><div class="stat-value">Today</div><div class="stat-label">Last Export</div></div>
+    <div class="stat-card c-green"><div class="stat-icon"><i class="bi bi-shield-lock"></i></div><div class="stat-value">GDPR</div><div class="stat-label">Ethics Compliant</div></div>
+  </div>
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Generate Report</span></div>
+      <div class="panel-body" style="display:flex;flex-direction:column;gap:14px">
+        <div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">Report Type</div>
+          <select class="form-control-dark"><option>Full Evaluation Report</option><option>Prediction Summary</option><option>Model Performance</option><option>Climate & Health Data</option><option>Risk Alert Summary</option></select>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">Date Range</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <input type="date" class="form-control-dark" value="2026-01-01">
+            <input type="date" class="form-control-dark" value="2026-03-17">
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">Format</div>
+          <select class="form-control-dark"><option>PDF</option><option>CSV</option><option>JSON</option><option>Excel (.xlsx)</option></select>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">Include</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" checked style="accent-color:var(--accent-teal)"> Model metrics (F1, ROC-AUC, RMSE)</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" checked style="accent-color:var(--accent-teal)"> Risk alerts log</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" checked style="accent-color:var(--accent-teal)"> SHAP explainability charts</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" style="accent-color:var(--accent-teal)"> Raw climate data tables</label>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn-primary-ai" onclick="alert('Generating report...')"><i class="bi bi-file-earmark-arrow-down"></i> Generate & Download</button>
+          <button class="btn-ghost"><i class="bi bi-eye"></i> Preview</button>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Recent Exports</span></div>
+      <div class="panel-body" style="padding:0">
+        <table class="data-table">
+          <thead><tr><th>Report</th><th>Format</th><th>Size</th><th>Date</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>Full Evaluation Report</td><td><span class="badge-pill badge-red">PDF</span></td><td style="font-family:var(--font-mono);font-size:12px">2.4 MB</td><td style="color:var(--text-muted);font-size:12px">Today</td><td><button class="btn-ghost" style="font-size:11px;padding:2px 10px" onclick="alert('Downloading...')"><i class="bi bi-download"></i></button></td></tr>
+            <tr><td>Risk Alert Summary</td><td><span class="badge-pill badge-teal">CSV</span></td><td style="font-family:var(--font-mono);font-size:12px">48 KB</td><td style="color:var(--text-muted);font-size:12px">Yesterday</td><td><button class="btn-ghost" style="font-size:11px;padding:2px 10px"><i class="bi bi-download"></i></button></td></tr>
+            <tr><td>Model Performance</td><td><span class="badge-pill badge-blue">JSON</span></td><td style="font-family:var(--font-mono);font-size:12px">128 KB</td><td style="color:var(--text-muted);font-size:12px">Mar 15</td><td><button class="btn-ghost" style="font-size:11px;padding:2px 10px"><i class="bi bi-download"></i></button></td></tr>
+            <tr><td>Climate Data Export</td><td><span class="badge-pill badge-teal">CSV</span></td><td style="font-family:var(--font-mono);font-size:12px">5.1 MB</td><td style="color:var(--text-muted);font-size:12px">Mar 14</td><td><button class="btn-ghost" style="font-size:11px;padding:2px 10px"><i class="bi bi-download"></i></button></td></tr>
+            <tr><td>Prediction Summary</td><td><span class="badge-pill badge-amber">XLSX</span></td><td style="font-family:var(--font-mono);font-size:12px">312 KB</td><td style="color:var(--text-muted);font-size:12px">Mar 12</td><td><button class="btn-ghost" style="font-size:11px;padding:2px 10px"><i class="bi bi-download"></i></button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div><!-- end .main -->
+
+{{ dashboard_trend_data|json_script:"dashboard-trend-data" }}
+{{ prediction_region_chart_data|json_script:"prediction-region-chart-data" }}
+{{ climate_chart_data|json_script:"climate-chart-data" }}
+{{ health_chart_data|json_script:"health-chart-data" }}
+{{ health_breakdown_data|json_script:"health-breakdown-data" }}
+{{ disaster_chart_data|json_script:"disaster-chart-data" }}
+{{ risk_map_points|json_script:"risk-map-data" }}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+<script>
+// ─── ROUTING ───
+const pageMeta = {
+  dashboard:   {title:'System Dashboard', sub:'{{ dashboard_subtitle|escapejs }}'},
+  predictions: {title:'Live Predictions', sub:'Kenya climate-region risk scoring from the current fixture snapshot'},
+  riskmap:     {title:'Risk Map', sub:'Geographic risk overlay · Kenya climate regions'},
+  emergencies: {title:'Community Emergencies', sub:'Publicly submitted emergency alerts requiring admin review'},
+  ingestion:   {title:'Data Ingestion', sub:'NASA POWER · WHO GHO · EM-DAT pipelines'},
+  climate:     {title:'Climate Data', sub:'NASA POWER · T2M, PRECTOTCORR, RH2M, WS2M'},
+  health:      {title:'Health Records', sub:'WHO GHO · Aggregated disease incidence data'},
+  disasters:   {title:'Disaster Events', sub:'EM-DAT fixture · Floods and droughts · 2023'},
+  lstm:        {title:'LSTM Model', sub:'Deep Learning · units:64 · dropout:0.2 · lookback:12'},
+  xgboost:     {title:'XGBoost Model', sub:'Gradient Boosting · n_estimators:200 · max_depth:5'},
+  hybrid:      {title:'Hybrid Ensemble', sub:'LSTM + XGBoost · Best performing model'},
+  xai:         {title:'XAI / Explainability', sub:'SHAP & LIME · Ethical AI · Feature attribution'},
+  evaluation:  {title:'Evaluation', sub:'Accuracy, F1, ROC-AUC, RMSE, MAE · All models'},
+  export:      {title:'Export Report', sub:'Generate PDF, CSV, JSON, XLSX reports'}
+};
+
+let activeCharts = {};
+
+function navigate(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + pageId).classList.add('active');
+  document.querySelector(`[data-page="${pageId}"]`).classList.add('active');
+  const meta = pageMeta[pageId];
+  document.getElementById('page-title').textContent = meta.title;
+  document.getElementById('page-sub').textContent = meta.sub;
+  document.title = 'FutureGuard — ' + meta.title;
+  setTimeout(() => initCharts(pageId), 50);
+}
+
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => navigate(item.dataset.page));
+});
+
+// ─── CHART FACTORY ───
+function makeChart(id, config) {
+  if (activeCharts[id]) { activeCharts[id].destroy(); }
+  const el = document.getElementById(id);
+  if (!el) return;
+  activeCharts[id] = new Chart(el, config);
+}
+
+const gridColor = 'rgba(255,255,255,0.05)';
+const tickColor = '#6b7a99';
+const tooltipDefaults = { backgroundColor:'#1c2540', borderColor:'rgba(255,255,255,0.08)', borderWidth:1, titleColor:'#e8ecf4', bodyColor:'#6b7a99', padding:10 };
+
+function readJSON(id, fallback) {
+  const el = document.getElementById(id);
+  if (!el) return fallback;
+  try {
+    return JSON.parse(el.textContent);
+  } catch (error) {
+    return fallback;
+  }
+}
+
+const dashboardTrendData = readJSON('dashboard-trend-data', {labels: [], malaria: [], cholera: [], floods: []});
+const predictionRegionChartData = readJSON('prediction-region-chart-data', {labels: [], malaria: [], cholera: [], floods: []});
+const climateChartData = readJSON('climate-chart-data', {labels: [], temperature: [], precipitation: []});
+const healthChartData = readJSON('health-chart-data', {labels: [], malaria: [], cholera: []});
+const healthBreakdownData = readJSON('health-breakdown-data', {labels: [], values: []});
+const disasterChartData = readJSON('disaster-chart-data', {labels: [], floods: [], droughts: []});
+const riskMapData = readJSON('risk-map-data', []);
+
+function initCharts(page) {
+  if (page === 'dashboard') {
+    makeChart('dashTrendChart', {type:'line', data:{labels:dashboardTrendData.labels, datasets:[
+      {label:'Malaria', data:dashboardTrendData.malaria, borderColor:'#00e5c3', backgroundColor:'rgba(0,229,195,0.08)', borderWidth:2, pointRadius:3, pointBackgroundColor:'#00e5c3', tension:0.4, fill:true},
+      {label:'Cholera', data:dashboardTrendData.cholera, borderColor:'#f5a623', backgroundColor:'rgba(245,166,35,0.05)', borderWidth:2, pointRadius:3, pointBackgroundColor:'#f5a623', tension:0.4, fill:true},
+      {label:'Floods',  data:dashboardTrendData.floods, borderColor:'#ff4d6d', backgroundColor:'rgba(255,77,109,0.05)', borderWidth:2, pointRadius:3, pointBackgroundColor:'#ff4d6d', tension:0.4, fill:true}
+    ]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:tooltipDefaults}, scales:{x:{grid:{color:gridColor}, ticks:{color:tickColor,font:{size:11}}}, y:{min:0,max:100, grid:{color:gridColor}, ticks:{color:tickColor,font:{size:11}, callback:v=>v+'%'}}}}});
+    makeChart('dashRadarChart', {type:'radar', data:{labels:['Accuracy','F1','Precision','Recall','ROC-AUC'], datasets:[
+      {label:'LSTM', data:[89,89,87,91,92], borderColor:'#00e5c3', backgroundColor:'rgba(0,229,195,0.1)', borderWidth:1.5, pointRadius:3, pointBackgroundColor:'#00e5c3'},
+      {label:'XGBoost', data:[87,87,86,88,90], borderColor:'#4da6ff', backgroundColor:'rgba(77,166,255,0.08)', borderWidth:1.5, pointRadius:3, pointBackgroundColor:'#4da6ff'}
+    ]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{r:{min:75,max:100, grid:{color:gridColor}, angleLines:{color:gridColor}, pointLabels:{color:tickColor,font:{size:10}}, ticks:{display:false}}}}});
+  }
+  if (page === 'predictions') {
+    makeChart('predBarChart', {type:'bar', data:{labels:predictionRegionChartData.labels, datasets:[
+      {label:'Malaria', data:predictionRegionChartData.malaria, backgroundColor:'rgba(0,229,195,0.7)', borderRadius:4},
+      {label:'Cholera', data:predictionRegionChartData.cholera, backgroundColor:'rgba(77,166,255,0.7)', borderRadius:4},
+      {label:'Flood',   data:predictionRegionChartData.floods, backgroundColor:'rgba(245,166,35,0.7)', borderRadius:4}
+    ]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top', labels:{color:tickColor,font:{size:11}}}, tooltip:tooltipDefaults}, scales:{x:{stacked:false, grid:{color:gridColor}, ticks:{color:tickColor,font:{size:10}}}, y:{min:0,max:100, grid:{color:gridColor}, ticks:{color:tickColor,font:{size:11}, callback:v=>v+'%'}}}}});
+  }
+  if (page === 'climate') {
+    makeChart('climateChart', {type:'line', data:{labels:climateChartData.labels, datasets:[
+      {label:'Temperature C', data:climateChartData.temperature, borderColor:'#f5a623', backgroundColor:'rgba(245,166,35,0.05)', borderWidth:2, tension:0.4, yAxisID:'y', pointRadius:3, pointBackgroundColor:'#f5a623'},
+      {label:'Precipitation mm', data:climateChartData.precipitation, borderColor:'#4da6ff', backgroundColor:'rgba(77,166,255,0.05)', borderWidth:2, tension:0.4, yAxisID:'y1', pointRadius:3, pointBackgroundColor:'#4da6ff'}
+    ]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:tooltipDefaults}, scales:{x:{grid:{color:gridColor}, ticks:{color:tickColor}}, y:{grid:{color:gridColor}, ticks:{color:tickColor, callback:v=>v+'C'}}, y1:{position:'right', grid:{display:false}, ticks:{color:'#4da6ff', callback:v=>v+'mm'}}}}});
+  }
+  if (page === 'health') {
+    makeChart('healthChart', {type:'bar', data:{labels:healthChartData.labels, datasets:[
+      {label:'Malaria', data:healthChartData.malaria, backgroundColor:'rgba(0,229,195,0.7)', borderRadius:3},
+      {label:'Cholera', data:healthChartData.cholera, backgroundColor:'rgba(77,166,255,0.7)', borderRadius:3}
+    ]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:tooltipDefaults}, scales:{x:{grid:{color:gridColor}, ticks:{color:tickColor,font:{size:11}}}, y:{grid:{color:gridColor}, ticks:{color:tickColor,font:{size:11}}}}}});
+    makeChart('healthDoughnut', {type:'doughnut', data:{labels:healthBreakdownData.labels, datasets:[{data:healthBreakdownData.values, backgroundColor:['#00e5c3','#4da6ff','#f5a623','#3d4a66'], borderWidth:0}]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom', labels:{color:tickColor,font:{size:11},padding:16}}, tooltip:tooltipDefaults}, cutout:'60%'}});
+  }
+  if (page === 'disasters') {
+    makeChart('disasterChart', {type:'bar', data:{labels:disasterChartData.labels, datasets:[
+      {label:'Floods', data:disasterChartData.floods, backgroundColor:'rgba(77,166,255,0.7)', borderRadius:3},
+      {label:'Droughts', data:disasterChartData.droughts, backgroundColor:'rgba(245,166,35,0.7)', borderRadius:3}
+    ]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top', labels:{color:tickColor,font:{size:11}}}, tooltip:tooltipDefaults}, scales:{x:{stacked:true, grid:{color:gridColor}, ticks:{color:tickColor}}, y:{stacked:true, grid:{color:gridColor}, ticks:{color:tickColor}}}}});
+  }
+  if (page === 'lstm') {
+    const epochs = Array.from({length:50},(_,i)=>i+1);
+    makeChart('lstmLossChart', {type:'line', data:{labels:epochs, datasets:[
+      {label:'Train Loss', data:epochs.map(e=>0.8*Math.exp(-e/12)+0.05+Math.random()*0.01), borderColor:'#00e5c3', borderWidth:2, pointRadius:0, tension:0.4},
+      {label:'Val Loss',   data:epochs.map(e=>0.85*Math.exp(-e/14)+0.07+Math.random()*0.015), borderColor:'#f5a623', borderWidth:2, pointRadius:0, tension:0.4, borderDash:[4,2]}
+    ]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:tooltipDefaults}, scales:{x:{grid:{color:gridColor}, ticks:{color:tickColor,font:{size:10}, callback:(_,i)=>i%10===0?i+1:''}}, y:{grid:{color:gridColor}, ticks:{color:tickColor,font:{size:11}}}}}});
+  }
+  if (page === 'xgboost') {
+    makeChart('xgbFeatChart', {type:'bar', data:{labels:['T2M','RH2M','PRECTOTCORR','Cases lag-1','WS2M','Season','Flood lag','Pop Density','Drought Idx','Month'], datasets:[{label:'Importance', data:[0.88,0.74,0.68,0.61,0.42,0.38,0.31,0.24,0.18,0.12], backgroundColor:['#ff4d6d','#ff4d6d','#f5a623','#f5a623','#4da6ff','#4da6ff','#a78bfa','#a78bfa','#6b7a99','#6b7a99'], borderRadius:3}]}, options:{indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:tooltipDefaults}, scales:{x:{grid:{color:gridColor}, ticks:{color:tickColor,font:{size:10}}, max:1.0}, y:{grid:{display:false}, ticks:{color:tickColor,font:{size:11}}}}}});
+  }
+  if (page === 'hybrid') {
+    makeChart('hybridRadar', {type:'radar', data:{labels:['Accuracy','F1','Precision','Recall','ROC-AUC','RMSE×10'], datasets:[
+      {label:'Hybrid', data:[91,91,92,90,94,95], borderColor:'#f5a623', backgroundColor:'rgba(245,166,35,0.1)', borderWidth:2, pointRadius:4, pointBackgroundColor:'#f5a623'},
+      {label:'LSTM',   data:[89,89,87,91,92,96], borderColor:'#00e5c3', backgroundColor:'rgba(0,229,195,0.06)', borderWidth:1.5, pointRadius:3, pointBackgroundColor:'#00e5c3'},
+      {label:'XGBoost',data:[87,87,86,88,90,95], borderColor:'#4da6ff', backgroundColor:'rgba(77,166,255,0.04)', borderWidth:1.5, pointRadius:3, pointBackgroundColor:'#4da6ff'}
+    ]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom', labels:{color:tickColor,font:{size:11},padding:14}}, tooltip:tooltipDefaults}, scales:{r:{min:80,max:100, grid:{color:gridColor}, angleLines:{color:gridColor}, pointLabels:{color:tickColor,font:{size:10}}, ticks:{display:false}}}}});
+  }
+  if (page === 'evaluation') {
+    makeChart('evalGroupChart', {type:'bar', data:{labels:['Accuracy','Precision','Recall','F1','ROC-AUC'], datasets:[
+      {label:'LSTM',    data:[89,87,91,89,92], backgroundColor:'rgba(0,229,195,0.7)', borderRadius:3},
+      {label:'XGBoost', data:[87,86,88,87,90], backgroundColor:'rgba(77,166,255,0.7)', borderRadius:3},
+      {label:'Hybrid',  data:[91,92,90,91,94], backgroundColor:'rgba(245,166,35,0.7)', borderRadius:3}
+    ]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top', labels:{color:tickColor,font:{size:11}}}, tooltip:tooltipDefaults}, scales:{x:{grid:{color:gridColor}, ticks:{color:tickColor}}, y:{min:80,max:100, grid:{color:gridColor}, ticks:{color:tickColor, callback:v=>v+'%'}}}}});
+  }
+  if (page === 'riskmap') {
+    initHeatMap();
+  }
+}
+
+function runPrediction() {
+  const btn = event.target;
+  btn.textContent = 'Running...';
+  btn.disabled = true;
+  setTimeout(()=>{ 
+    document.getElementById('pred-result').style.display='block';
+    btn.innerHTML='<i class="bi bi-play-fill"></i> Run Prediction';
+    btn.disabled=false;
+  }, 1800);
+}
+
+function filterRiskZones(threat, btn) {
+  document.querySelectorAll('.risk-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('#page-riskmap tbody tr').forEach(tr => {
+    const rowThreat = tr.getAttribute('data-threat');
+    tr.style.display = (threat === 'All' || rowThreat === threat) ? '' : 'none';
+  });
+}
+
+let heatmapInstance = null;
+
+function initHeatMap() {
+  const container = document.getElementById('map');
+  if (!container) return;
+  
+  // Destroy existing map if already initialized
+  if (window.heatmapLeaflet) {
+    window.heatmapLeaflet.remove();
+  }
+  
+  const defaultCenter = [-1.2833, 36.0826];
+  const mapCenter = riskMapData.length
+    ? [
+        riskMapData.reduce((sum, point) => sum + point.lat, 0) / riskMapData.length,
+        riskMapData.reduce((sum, point) => sum + point.lng, 0) / riskMapData.length
+      ]
+    : defaultCenter;
+
+  const map = L.map('map', {
+    center: mapCenter,
+    zoom: 6,
+    scrollWheelZoom: true,
+    attributionControl: false,
+    zoomControl: false
+  });
+  
+  // Add a dark tile layer
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19
+  }).addTo(map);
+  
+  const heatData = riskMapData.map(point => [
+    point.lat,
+    point.lng,
+    Math.max(0.2, point.risk / 100)
+  ]);
+  
+  // Create heat layer with custom gradient
+  L.heatLayer(heatData, {
+    radius: 60,
+    blur: 40,
+    maxZoom: 13,
+    gradient: {0.0: '#4da6ff', 0.5: '#f5a623', 0.8: '#ff4d6d', 1.0: '#ff2444'},
+    minOpacity: 0.2
+  }).addTo(map);
+  
+  const riskColor = level => {
+    if (level === 'Critical') return '#ff4d6d';
+    if (level === 'High') return '#f5a623';
+    if (level === 'Moderate') return '#4da6ff';
+    return '#3ddc84';
+  };
+
+  riskMapData.forEach(loc => {
+    const color = riskColor(loc.level);
+    const popup = `<div style="font-family: DM Mono; font-size: 11px"><strong>${loc.zone}</strong><br>Threat: ${loc.threat}<br>Risk: <span style="color: ${color}">${loc.risk}%</span><br>Level: ${loc.level}</div>`;
+    L.circleMarker([loc.lat, loc.lng], {
+      radius: 8,
+      fillColor: color,
+      color: color,
+      weight: 2,
+      opacity: 0.8,
+      fillOpacity: 0.7
+    }).bindPopup(popup).addTo(map);
+  });
+  
+  window.heatmapLeaflet = map;
+}
+
+function setTheme(isLight) {
+  const body = document.body;
+  const icon = document.querySelector('#themeToggle i');
+  if (isLight) {
+    body.classList.add('light-mode');
+    icon.classList.remove('bi-moon-fill');
+    icon.classList.add('bi-sun-fill');
+    localStorage.setItem('theme', 'light');
+  } else {
+    body.classList.remove('light-mode');
+    icon.classList.remove('bi-sun-fill');
+    icon.classList.add('bi-moon-fill');
+    localStorage.setItem('theme', 'dark');
+  }
+}
+
+function toggleTheme() {
+  setTheme(!document.body.classList.contains('light-mode'));
+}
+
+function loadTheme() {
+  const saved = localStorage.getItem('theme');
+  if (saved === 'light') {
+    setTheme(true);
+  } else if (saved === 'dark') {
+    setTheme(false);
+  } else {
+    // Default to system preference
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setTheme(!prefersDark);
+  }
+}
+
+// Boot
+loadTheme();
+navigate('{{ initial_page|default:"dashboard"|escapejs }}');
+</script>
+</body>
+</html>

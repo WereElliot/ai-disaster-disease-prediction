@@ -1,0 +1,319 @@
+{% extends "community_dashboard/base_public.html" %}
+
+{% block page_styles %}
+  <style>
+    .report-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .report-hero p {
+      margin: 1rem 0 0;
+      max-width: 62ch;
+    }
+
+    .report-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(290px, 0.75fr);
+      gap: 1.5rem;
+    }
+
+    .form-panel,
+    .support-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      box-shadow: var(--shadow-soft);
+      padding: 1.5rem;
+    }
+
+    .form-panel h2,
+    .support-panel h3 {
+      font-family: var(--font-display);
+      letter-spacing: -0.03em;
+      margin: 0;
+    }
+
+    .form-panel p,
+    .support-panel p {
+      color: var(--text-secondary);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      margin-top: 1.25rem;
+    }
+
+    .field-wide {
+      grid-column: 1 / -1;
+    }
+
+    .success-banner,
+    .error-banner,
+    .tip-card {
+      border-radius: 20px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+
+    .success-banner {
+      background: rgba(56, 184, 131, 0.12);
+      border: 1px solid rgba(56, 184, 131, 0.2);
+      color: #116544;
+      font-weight: 700;
+    }
+
+    body.dark-mode .success-banner {
+      color: #9ef1cd;
+    }
+
+    .error-banner {
+      background: rgba(255, 107, 135, 0.12);
+      border: 1px solid rgba(255, 107, 135, 0.2);
+      color: #b42342;
+      font-weight: 700;
+    }
+
+    body.dark-mode .error-banner {
+      color: #ffb5c2;
+    }
+
+    .hint {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      margin-top: 0.45rem;
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+      margin-top: 1.2rem;
+    }
+
+    .tip-stack {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .tip-card {
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+    }
+
+    .tip-card h4 {
+      margin: 0 0 0.5rem;
+      font-family: var(--font-display);
+    }
+
+    .tip-card ul {
+      margin: 0;
+      padding-left: 1.1rem;
+      display: grid;
+      gap: 0.45rem;
+      color: var(--text-secondary);
+    }
+
+    .contact-list {
+      display: grid;
+      gap: 0.7rem;
+      margin-top: 0.9rem;
+    }
+
+    .contact-chip {
+      display: flex;
+      gap: 0.65rem;
+      align-items: center;
+      padding: 0.8rem 0.95rem;
+      border-radius: 18px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-weight: 700;
+    }
+
+    .contact-chip i {
+      color: var(--accent-sky);
+    }
+
+    @media (max-width: 980px) {
+      .report-hero,
+      .report-grid,
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <section class="hero-shell report-hero">
+    <div>
+      <h1>Send a <span>community emergency alert</span> to the admin team</h1>
+      <p class="page-copy">
+        Use this page to report a flood, fire, disease outbreak, medical
+        emergency, infrastructure failure, or another urgent event in your
+        community. The report is stored in the main admin dashboard for review
+        and follow-up.
+      </p>
+    </div>
+
+    <aside class="panel-card">
+      <h2>What Happens Next</h2>
+      <ul class="info-list" style="margin-top: 1rem">
+        <li><i class="bi bi-broadcast"></i> The alert is recorded in the admin dashboard immediately.</li>
+        <li><i class="bi bi-clipboard-check"></i> Admins can acknowledge, track, and resolve the report.</li>
+        <li><i class="bi bi-info-circle"></i> Clear location details help responders follow up faster.</li>
+      </ul>
+    </aside>
+  </section>
+
+  <section class="report-grid">
+    <div class="form-panel">
+      <h2>Emergency Posting Form</h2>
+      <p>Share the emergency details as clearly as possible so the right people can respond quickly.</p>
+
+      {% if submitted %}
+        <div class="success-banner">
+          Emergency report submitted successfully.
+          {% if submitted_reference %}
+            Reference ID: #{{ submitted_reference }}.
+          {% endif %}
+          The alert is now visible to admins in the main dashboard.
+        </div>
+      {% endif %}
+
+      {% if form_error %}
+        <div class="error-banner">{{ form_error }}</div>
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-grid">
+          <div>
+            <label for="reporter_name">Your name</label>
+            <input
+              id="reporter_name"
+              name="reporter_name"
+              type="text"
+              value="{{ form_data.reporter_name }}"
+              placeholder="Optional if you want to stay anonymous"
+            />
+          </div>
+          <div>
+            <label for="reporter_phone">Phone number</label>
+            <input
+              id="reporter_phone"
+              name="reporter_phone"
+              type="text"
+              value="{{ form_data.reporter_phone }}"
+              placeholder="Optional contact for follow-up"
+            />
+          </div>
+          <div>
+            <label for="county">County</label>
+            <select id="county" name="county" required>
+              <option value="">Select county</option>
+              {% for county in county_options %}
+                <option value="{{ county }}" {% if form_data.county == county %}selected{% endif %}>
+                  {{ county }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label for="location_detail">Location detail</label>
+            <input
+              id="location_detail"
+              name="location_detail"
+              type="text"
+              value="{{ form_data.location_detail }}"
+              placeholder="Estate, village, road, landmark, or facility"
+            />
+          </div>
+          <div>
+            <label for="emergency_type">Emergency type</label>
+            <select id="emergency_type" name="emergency_type" required>
+              <option value="">Choose emergency type</option>
+              {% for value, label in emergency_type_options %}
+                <option value="{{ value }}" {% if form_data.emergency_type == value %}selected{% endif %}>
+                  {{ label }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label for="severity">Severity</label>
+            <select id="severity" name="severity" required>
+              {% for value, label in severity_options %}
+                <option value="{{ value }}" {% if form_data.severity == value %}selected{% endif %}>
+                  {{ label }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="field-wide">
+            <label for="people_affected">Estimated people affected</label>
+            <input
+              id="people_affected"
+              name="people_affected"
+              type="number"
+              min="0"
+              value="{{ form_data.people_affected }}"
+              placeholder="0"
+            />
+          </div>
+          <div class="field-wide">
+            <label for="description">Describe the emergency</label>
+            <textarea
+              id="description"
+              name="description"
+              required
+              placeholder="Explain what happened, what is still happening, and what help may be needed."
+            >{{ form_data.description }}</textarea>
+            <div class="hint">
+              Include injuries, blocked roads, damaged infrastructure, evacuations,
+              symptoms, or any immediate danger if known.
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn-primary" type="submit">
+            <i class="bi bi-send-fill"></i>
+            Submit Emergency Alert
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <aside class="support-panel">
+      <div class="tip-stack">
+        <div class="tip-card">
+          <h4>Share the most useful details</h4>
+          <ul>
+            <li>Where exactly the incident is happening.</li>
+            <li>Whether people are trapped, injured, displaced, or exposed.</li>
+            <li>Whether the situation is growing, stable, or already controlled.</li>
+          </ul>
+        </div>
+        <div class="tip-card">
+          <h4>Need urgent help right now?</h4>
+          <p>
+            If the situation is immediately life-threatening, contact responders
+            directly while also submitting the report here.
+          </p>
+          <div class="contact-list">
+            <div class="contact-chip"><i class="bi bi-telephone"></i> Ambulance: 911</div>
+            <div class="contact-chip"><i class="bi bi-heart-pulse"></i> County Health Office: 0800-720-720</div>
+            <div class="contact-chip"><i class="bi bi-shield-exclamation"></i> Red Cross: 020-604-1234</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </section>
+{% endblock %}
